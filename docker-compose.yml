@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  kasa_controller:
+    container_name: kasa_controller
+    build: .
+    # volumes:
+    #   - .:/usr/src/app
+    ports:
+      - 5000:5000
