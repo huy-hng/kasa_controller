@@ -45,6 +45,8 @@ async def set_color_temp(temp):
 
 
 async def transition_color_temp(target_t: int, duration:int):
+  await bulb.update()
+
   single_change_dur = 0.14
 
   target_temp = 38 * target_t + 2700
@@ -104,6 +106,7 @@ async def transition_brightness(target_b: int, duration: int):
   
   duration in seconds
   """
+  await bulb.update()
   single_change_dur = 0.15
   curr_b = bulb.brightness
 
@@ -156,28 +159,3 @@ async def transition_brightness(target_b: int, duration: int):
   
   print('actual dur:', round(time.perf_counter() - t0, 4))
   print('expected dur:', expected_change_dur + sleep_dur)
-
-
-async def test():
-  valid_temps = bulb.valid_temperature_range
-  min_temp = 2700
-  max_temp = 6500
-
-  t0 = time.perf_counter()
-  for temp in range(max_temp, min_temp-1, -1000):
-  # # for temp in range(min_temp, max_temp+1, 100):
-    await set_color_temp(temp)
-    print(temp)
-  print(round(time.perf_counter()-t0, 2))
-
-
-async def main():
-  await bulb.update()
-  b = bulb.brightness
-  set_b = 0 if b == 100 else 100
-  await transition_brightness(set_b, 1)
-  # await test()
-  # await set_color_temp(6500)
-
-
-asyncio.run(main())
