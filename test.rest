@@ -1,0 +1,25 @@
+GET http://0.0.0.0:5000/brightness 
+
+###
+
+POST http://0.0.0.0:5000/brightness
+content-type: application/json
+
+{
+    "target": 100,
+    "duration": 3
+}
+
+###
+
+GET http://0.0.0.0:5000/temp 
+
+###
+
+POST http://0.0.0.0:5000/temp
+content-type: application/json
+
+{
+    "target": 100,
+    "duration": 3
+}
