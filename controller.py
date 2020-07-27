@@ -194,7 +194,7 @@ async def transition_color_temp(target_t: int, duration:int):
 async def main():
   await bulb.update()
   b = 0 if bulb.brightness == 100 else 100
-  await change_temperature(0, 2)
+  await change_brightness(b, 2)
 
 
 asyncio.run(main())
