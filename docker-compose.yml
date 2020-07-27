@@ -4,7 +4,16 @@ services:
   kasa_controller:
     container_name: kasa_controller
     build: .
-    # volumes:
-    #   - .:/usr/src/app
     ports:
       - 5000:5000
+
+  socat:
+    container_name: socat
+    image: alpine/socat
+    ports: 
+      - 5443:5443
+    links:
+      - 'kasa_controller'
+    command: openssl-listen:5443,fork,reuseaddr,cert=/tls/server.pem,verify=0 tcp-connect:kasa_controller:5000
+    volumes:
+      - ./server.pem:/tls/server.pem
