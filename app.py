@@ -1,39 +1,64 @@
 import asyncio
 
 from flask import Flask, request
-from flask_restful import Resource, Api
 
 import controller
 
 app = Flask(__name__)
-api = Api(app)
 
-class Brightness(Resource):
-  def get(self):
+
+@app.route('/brightness', methods=['GET', 'POST'])
+def brightness():
+  if request.method == 'GET':
     asyncio.run(controller.bulb.update())
-    return controller.bulb.brightness
-  def post(self):
-    data = request.json
-    target = data['target']
-    duration = data['duration']
+    return str(controller.bulb.brightness)
 
-    asyncio.run(controller.transition_brightness(target, duration))
+  output = run_task('brightness', request.json)
+  return output
 
-class ColorTemperature(Resource):
-  def get(self):
+
+@app.route('/temp', methods=['GET', 'POST'])
+def color_temp():
+  if request.method == 'GET':
     asyncio.run(controller.bulb.update())
-    return controller.bulb.color_temp
+    return str(controller.bulb.color_temp)
 
-  def post(self):
-    data = request.json
-    target = data['target']
-    duration = data['duration']
-
-    asyncio.run(controller.transition_color_temp(target, duration))
+  output = run_task('color_temp', request.json)
+  return output
 
 
-api.add_resource(Brightness, '/brightness')
-api.add_resource(ColorTemperature, '/temp')
+@app.route('/state', methods=['GET', 'POST'])
+def state():
+  if request.method == 'GET':
+    asyncio.run(controller.bulb.update())
+    return 'on' if controller.bulb.is_on else 'off'
+
+  data = request.json
+  if data['state']:
+    asyncio.run(controller.bulb.turn_on())
+  else:
+    asyncio.run(controller.bulb.turn_off())
+
+  return 'done'
+
+def run_task(task, data):
+  target_value = data['target']
+  duration = data['duration']
+  start_value = data.get('start_value')
+
+  fn = None
+  if task == 'brightness':
+    fn = controller.change_brightness
+  elif task == 'color_temp':
+    fn = controller.change_temperature
+
+  asyncio.run(fn(target_value, duration, start_value))
+
+  start = ''
+  if start_value:
+    start = f' from {start_value}'
+
+  return f'Changed {task}{start} to {target_value} in {duration} seconds.'
 
 if __name__ == '__main__':
   app.run(debug=True, host='0.0.0.0')

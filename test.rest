@@ -1,4 +1,8 @@
-GET http://0.0.0.0:5000/brightness 
+# GET https://192.168.188.29:5443/brightness 
+GET http://0.0.0.0:5000/brightness
+
+###
+
 
 ###
 
@@ -7,7 +11,7 @@ content-type: application/json
 
 {
     "target": 100,
-    "duration": 3
+    "duration": 10
 }
 
 ###
@@ -20,6 +24,6 @@ POST http://0.0.0.0:5000/temp
 content-type: application/json
 
 {
-    "target": 100,
+    "target": 0,
     "duration": 3
 }
