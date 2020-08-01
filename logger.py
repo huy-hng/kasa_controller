@@ -1,5 +1,10 @@
 import logging
 import datetime
+import os
+
+print(os.getcwd())
+if os.path.isdir('./logs'):
+  os.mkdir('./logs')
 
 log = logging.getLogger('root')
 log.setLevel(logging.DEBUG)
