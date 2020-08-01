@@ -8,7 +8,7 @@ from logger import log
 
 SINGLE_CHANGE_DUR = 0.12
 
-bulb = SmartBulb('192.168.188.26')
+bulb = SmartBulb('10.0.2.23')
 
 ################
 #region Helpers#
@@ -227,8 +227,8 @@ async def main():
   c = 0 if bulb.color_temp == 6500 else 100
 
   #TODO: since 1-15 is all the same brightness, improve it somehow
-  await change_brightness(15, 1)
+  await change_brightness(100, 1)
   # await change_temperature(c, 1)
 
 
-asyncio.run(main())
+# asyncio.run(main())
