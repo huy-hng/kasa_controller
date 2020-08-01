@@ -3,7 +3,7 @@ import datetime
 import os
 
 print(os.getcwd())
-if os.path.isdir('./logs'):
+if not os.path.isdir('./logs'):
   os.mkdir('./logs')
 
 log = logging.getLogger('root')
