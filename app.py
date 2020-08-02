@@ -1,10 +1,15 @@
 import asyncio
 
-from flask import Flask, request
+from flask import Flask, request, render_template
 
 import controller
 
 app = Flask(__name__)
+
+
+@app.route('/')
+def home():
+  return render_template('home.html')
 
 
 @app.route('/brightness', methods=['GET', 'POST'])

@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="card">
+    <div class="card-body">
+        Available routes:
+        <ul>
+            <li><a href="/brightness">/brightness</a> - GET or POST</li>
+            <li><a href="/temp">/temp</a> - GET or POST</li>
+        </ul>
+        Both take a json with the following keys:
+        </br>
+        {
+            "target": [from 0 to 100],
+            "duration": [in seconds]
+        }
+
+    </div>
+</div>
+
+{% endblock content %}

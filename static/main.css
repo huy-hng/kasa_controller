@@ -1,0 +1,42 @@
+body {
+  background: #1b1a18;
+  color: #333333;
+  margin-top: 5rem;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #444444;
+}
+
+.bg-steel {
+  background-color: #000000;
+}
+
+.site-header .navbar-nav .nav-link {
+  color: #cbd5db;
+}
+
+.site-header .navbar-nav .nav-link:hover {
+  color: #ffffff;
+}
+
+.site-header .navbar-nav .nav-link.active {
+  font-weight: 500;
+}
+
+.card-content {
+  margin: 0px 10px;
+}
+
+.content-section {
+  background: #1b1a18;
+  padding: 10px 20px;
+  border: 1px solid #3a3a3a;
+  border-radius: 3px;
+  margin-bottom: 20px;
+}
