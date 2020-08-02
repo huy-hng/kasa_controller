@@ -223,11 +223,11 @@ async def transition_color_temp(target_t: int, duration:int):
 
 async def main():
   await bulb.update()
-  b = 0 if bulb.brightness == 100 else 100
+  b = 1 if bulb.brightness == 100 else 100
   c = 0 if bulb.color_temp == 6500 else 100
 
   #TODO: since 1-15 is all the same brightness, improve it somehow
-  await change_brightness(100, 1)
+  await change_brightness(b, 1)
   # await change_temperature(c, 1)
 
 
