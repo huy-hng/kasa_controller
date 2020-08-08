@@ -57,7 +57,7 @@ def run_task(task, data):
   elif task == 'color_temp':
     fn = controller.change_temperature
 
-  asyncio.run(fn(target_value, duration, start_value))
+  asyncio.create_task(fn(target_value, duration, start_value))
 
   start = ''
   if start_value:
