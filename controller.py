@@ -57,7 +57,7 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 
     await fn(curr_value)
 
-    time.sleep(single_sleep_dur)
+    await asyncio.sleep(single_sleep_dur)
 
   t1 = time.perf_counter() - t0
   # log.debug(f'actual_change_dur={round(t1-sleep_dur, 4)}')
@@ -102,7 +102,7 @@ async def set_brightness(value):
 
   if turn_off:
     log.info(f'brightness is 0, turning lamp off')
-    time.sleep(0.2)
+    await asyncio.sleep(0.2)
     await bulb.turn_off()
 
 
@@ -122,22 +122,6 @@ async def transition_bright(target_value: int, duration: int):
   single_sleep_dur, sleep_dur = calc_sleep_dur(duration, amount_of_steps)
   
   await transition(curr_value, target_value, cond, set_brightness, step_size, single_sleep_dur)
-
-  # t0 = time.perf_counter()
-  # while cond(curr_value):
-  #   curr_value += step_size
-
-  #   if not cond(curr_value):
-  #     # check that curr_value doesnt overshoot target_value
-  #     curr_value = target_value
-
-  #   await set_brightness(curr_value)
-
-  #   time.sleep(single_sleep_dur)
-
-  # t1 = time.perf_counter() - t0
-  # log.debug(f'actual_change_dur={round(t1-sleep_dur, 4)}')
-  # log.debug(f'actual_complete_dur={round(t1, 4)}')
 
 
 def get_steps(duration, diff):
@@ -180,10 +164,10 @@ async def set_color_temp(value):
 
 
 async def transition_color_temp(target_t: int, duration:int):
-  target_temp = 38 * target_t + 2700
-  curr_temp = bulb.color_temp
+  target_value = 38 * target_t + 2700
+  curr_value = bulb.color_temp
 
-  diff, cond = get_diff(curr_temp, target_temp)
+  diff, cond = get_diff(curr_value, target_value)
   if diff == 0:
     return # return when theres no change to make
 
@@ -200,22 +184,7 @@ async def transition_color_temp(target_t: int, duration:int):
   amount_of_steps = math.ceil(diff / step_size)
   single_sleep_dur, sleep_dur = calc_sleep_dur(duration, amount_of_steps)
 
-
-  t0 = time.perf_counter()
-  while cond(curr_temp):
-    curr_temp += step_size
-
-    if not cond(curr_temp):
-      # check that curr_temp doesnt overshoot target_temp
-      curr_temp = target_temp
-
-    await bulb.set_color_temp(curr_temp)
-
-    time.sleep(single_sleep_dur)
-  
-  t1 = time.perf_counter() - t0
-  log.debug(f'actual_change_dur={round(t1-sleep_dur, 4)}')
-  log.debug(f'actual_complete_dur={round(t1, 4)}')
+  await transition(curr_value, target_value, cond, set_color_temp, step_size, single_sleep_dur)
 #endregion Temperature
 ####################
 
