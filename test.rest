@@ -10,7 +10,7 @@ POST http://0.0.0.0:5000/brightness
 content-type: application/json
 
 {
-    "target": 100,
+    "target": 1,
     "duration": 10
 }
 

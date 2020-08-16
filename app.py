@@ -1,11 +1,14 @@
 import asyncio
+import time
+import threading
 
 from flask import Flask, request, render_template
 
 import controller
+from logger import log
 
 app = Flask(__name__)
-
+loop = asyncio.new_event_loop()
 
 @app.route('/')
 def home():
@@ -18,7 +21,9 @@ def brightness():
     asyncio.run(controller.bulb.update())
     return str(controller.bulb.brightness)
 
+  t0 = time.perf_counter()
   output = run_task('brightness', request.json)
+  log.info(round(time.perf_counter() - t0, 2))
   return output
 
 
@@ -57,7 +62,13 @@ def run_task(task, data):
   elif task == 'color_temp':
     fn = controller.change_temperature
 
-  asyncio.create_task(fn(target_value, duration, start_value))
+  # log.info(loop.is_running())
+  # asyncio.create_task(fn(target_value, duration, start_value))
+  queue.put_nowait((fn, {
+    'target_value': target_value,
+    'duration': duration,
+    'start_value': start_value
+  }))
 
   start = ''
   if start_value:
@@ -65,5 +76,33 @@ def run_task(task, data):
 
   return f'Changed {task}{start} to {target_value} in {duration} seconds.'
 
-if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0')
+
+async def worker(name, queue):
+  log.info(f'spawning worker {name}')
+  while True:
+    task, kwargs = await queue.get()
+    log.info(f'{task}, {kwargs}')
+    await task(kwargs)
+    queue.task_done()
+
+    log.info(f'{name} is done')
+
+
+async def main():
+  global queue
+  queue = asyncio.Queue()
+  for i in range(3):
+    asyncio.create_task(worker(f'worker-{i}', queue))
+
+  threading.Thread(target=app.run).start()
+
+  # app.run(debug=True, host='0.0.0.0')
+
+
+  # await queue.join()
+# if __name__ == '__main__':
+  # executor.submit(loop.run_forever)
+  # app.run(debug=True, host='0.0.0.0')
+
+queue = None
+asyncio.run(main())
