@@ -2,9 +2,11 @@ import asyncio
 import random
 import time
 
-async def slow_task():
-  await asyncio.sleep(0.5)
-  print('task done')
+async def slow_task(n):
+  for _ in range(10):
+    await asyncio.sleep(0.1)
+    print('from', n)
+  print(n, 'done')
 
 async def worker(name, queue):
   print('spawning worker', name)
@@ -17,8 +19,7 @@ async def worker(name, queue):
 
 def fn():
   global queue
-  for _ in range(6):
-    queue.put_nowait(slow_task)
+
 
 
 async def main():
@@ -30,7 +31,9 @@ async def main():
     w = asyncio.create_task(worker(f'worker-{i}', queue))
     # workers.append(w)
 
-
+  queue.put_nowait(lambda: slow_task(0))
+  queue.put_nowait(lambda: slow_task(1))
+  queue.put_nowait(lambda: slow_task(2))
 
   while queue.qsize() > 0:
     await queue.join()

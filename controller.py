@@ -1,6 +1,9 @@
 import time
 import math
 import asyncio
+from functools import wraps
+from concurrent.futures import ThreadPoolExecutor
+
 
 from kasa import SmartBulb
 
@@ -10,9 +13,18 @@ SINGLE_CHANGE_DUR = 0.12
 
 bulb = SmartBulb('10.0.2.23')
 
+
+
 ################
 #region Helpers#
 ################
+def put_in_queue(fn):
+  @wraps(fn)
+  def wrapper(*args, **kwargs):
+    queue.put_nowait(lambda: fn(*args, **kwargs))
+
+  return wrapper
+
 def perceived2actual_brightness(perceived):
   return round((perceived ** 2) / 100)
 
@@ -29,7 +41,7 @@ def get_diff(curr_val, target_val):
   else:
     cond = lambda curr_val: curr_val > target_val
 
-  log.debug(f'{diff=}')
+  # log.debug(f'{diff=}')
   return diff, cond
 
 def calc_sleep_dur(duration, amount_of_steps):
@@ -41,10 +53,9 @@ def calc_sleep_dur(duration, amount_of_steps):
 
   single_sleep_dur = sleep_dur / amount_of_steps
 
-  log.debug(f'sleep_dur={round(sleep_dur, 2)}')
-  log.debug(f'expected_change_dur={round(expected_change_dur, 2)}')
-  log.debug(f'expected_change_dur={round(expected_change_dur, 2)}')
-  return single_sleep_dur, sleep_dur
+  # log.debug(f'sleep_dur={round(sleep_dur, 2)}')
+  # log.debug(f'expected_change_dur={round(expected_change_dur, 2)}')
+  return single_sleep_dur
 
 async def transition(curr_value, target_value, cond, fn, step_size, single_sleep_dur):
   t0 = time.perf_counter()
@@ -58,6 +69,7 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
     await fn(curr_value)
 
     await asyncio.sleep(single_sleep_dur)
+    # time.sleep(single_sleep_dur)
 
   t1 = time.perf_counter() - t0
   # log.debug(f'actual_change_dur={round(t1-sleep_dur, 4)}')
@@ -70,15 +82,13 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 ###################
 #region Brightness#
 ###################
+# @put_in_queue
 async def change_brightness(target_value: int, duration: int, start_value: int=None):
   await bulb.turn_on()
   await bulb.update()
 
   log.warning('')
-  log.debug(f'{start_value=}')
-  log.debug(f'curr_value={bulb.brightness}')
-  log.debug(f'{target_value=}')
-  log.debug(f'{duration=}')
+  # log.debug(f'{start_value=} curr_value={bulb.brightness} {target_value=} {duration=}')
 
   if duration==0:
     await set_brightness(target_value)
@@ -119,7 +129,9 @@ async def transition_bright(target_value: int, duration: int):
     return # return when theres no change to make
 
   amount_of_steps, step_size = get_steps(duration, diff)
-  single_sleep_dur, sleep_dur = calc_sleep_dur(duration, amount_of_steps)
+  single_sleep_dur = calc_sleep_dur(duration, amount_of_steps)
+
+  log.debug(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
   
   await transition(curr_value, target_value, cond, set_brightness, step_size, single_sleep_dur)
 
@@ -134,7 +146,7 @@ def get_steps(duration, diff):
   else:
     step_size = math.ceil(step_size)
 
-  log.debug(f'{step_size=}')
+  # log.debug(f'{step_size=}')
   amount_of_steps = math.ceil(diff / step_size)
   return amount_of_steps, step_size
 
@@ -146,6 +158,7 @@ def get_steps(duration, diff):
 ####################
 #region Temperature#
 ####################
+# @put_in_queue
 async def change_temperature(target_value: int, duration: int, start_value: int=None):
   await bulb.turn_on()
   await bulb.update()
@@ -160,6 +173,7 @@ async def change_temperature(target_value: int, duration: int, start_value: int=
 
 
 async def set_color_temp(value):
+  log.debug(f'change temp to {value}')
   await bulb.set_color_temp(value)
 
 
@@ -182,22 +196,57 @@ async def transition_color_temp(target_t: int, duration:int):
   #endregion
 
   amount_of_steps = math.ceil(diff / step_size)
-  single_sleep_dur, sleep_dur = calc_sleep_dur(duration, amount_of_steps)
+  single_sleep_dur = calc_sleep_dur(duration, amount_of_steps)
+
+  log.debug(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
 
   await transition(curr_value, target_value, cond, set_color_temp, step_size, single_sleep_dur)
 #endregion Temperature
 ####################
 
 
+async def worker(name, queue):
+  log.info(f'spawning worker {name}')
+  while True:
+    task = await queue.get()
+    await task()
+    queue.task_done()
+    log.info(f'{name} is done')
+    await asyncio.sleep(0.1)
 
+ 
 async def main():
   await bulb.update()
-  b = 1 if bulb.brightness == 100 else 100
+  b = 50 if bulb.brightness == 100 else 100
   c = 0 if bulb.color_temp == 6500 else 100
 
-  #TODO: since 1-15 is all the same brightness, improve it somehow
-  await change_brightness(b, 1)
-  # await change_temperature(c, 1)
+  # with ThreadPoolExecutor() as executor:
+  #   executor.submit(lambda: asyncio.run(change_brightness(b, 5)))
+  #   executor.submit(lambda: asyncio.run(change_temperature(c, 5)))
 
 
-# asyncio.run(main())
+  # await asyncio.gather(change_brightness(b, 1), change_temperature(c, 1))
+
+
+  global queue
+  queue = asyncio.Queue()
+
+  # workers = []
+  for i in range(6):
+    w = asyncio.create_task(worker(f'worker-{i}', queue))
+    # workers.append(w)
+
+  log.info('created workers')
+
+  queue.put_nowait(lambda: change_temperature(c, 5))
+  queue.put_nowait(lambda: change_brightness(b, 5))
+    
+  while True:
+    await queue.join()
+  log.info('done with everything')
+
+
+asyncio.run(main())
+
+# executor = ThreadPoolExecutor()
+# executor.submit(asyncio.run, lambda: main())

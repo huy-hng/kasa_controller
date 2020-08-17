@@ -11,12 +11,8 @@ content-type: application/json
 
 {
     "target": 1,
-    "duration": 10
+    "duration": 3
 }
-
-###
-
-GET http://0.0.0.0:5000/temp 
 
 ###
 
