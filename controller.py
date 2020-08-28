@@ -18,11 +18,12 @@ bulb = SmartBulb('10.0.2.23')
 ################
 #region Helpers#
 ################
-def put_in_queue(fn):
+executor = ThreadPoolExecutor()
+
+def runner(fn):
   @wraps(fn)
   def wrapper(*args, **kwargs):
-    queue.put_nowait(lambda: fn(*args, **kwargs))
-
+    executor.submit(lambda: asyncio.run(fn(*args, **kwargs)))
   return wrapper
 
 def perceived2actual_brightness(perceived):
@@ -73,7 +74,7 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 
   t1 = time.perf_counter() - t0
   # log.debug(f'actual_change_dur={round(t1-sleep_dur, 4)}')
-  log.debug(f'actual_complete_dur={round(t1, 4)}')
+  log.info(f'actual_complete_dur={round(t1, 4)}')
 #endregion Helpers
 ################
 
@@ -82,13 +83,13 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 ###################
 #region Brightness#
 ###################
-# @put_in_queue
+@runner
 async def change_brightness(target_value: int, duration: int, start_value: int=None):
   await bulb.turn_on()
   await bulb.update()
 
   log.warning('')
-  # log.debug(f'{start_value=} curr_value={bulb.brightness} {target_value=} {duration=}')
+  log.info(f'{start_value=} curr_value={bulb.brightness} {target_value=} {duration=}')
 
   if duration==0:
     await set_brightness(target_value)
@@ -131,7 +132,7 @@ async def transition_bright(target_value: int, duration: int):
   amount_of_steps, step_size = get_steps(duration, diff)
   single_sleep_dur = calc_sleep_dur(duration, amount_of_steps)
 
-  log.debug(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
+  log.info(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
   
   await transition(curr_value, target_value, cond, set_brightness, step_size, single_sleep_dur)
 
@@ -150,7 +151,7 @@ def get_steps(duration, diff):
   amount_of_steps = math.ceil(diff / step_size)
   return amount_of_steps, step_size
 
-#endregion Brightness
+#endregion
 ###################
 
 
@@ -158,10 +159,12 @@ def get_steps(duration, diff):
 ####################
 #region Temperature#
 ####################
-# @put_in_queue
+@runner
 async def change_temperature(target_value: int, duration: int, start_value: int=None):
   await bulb.turn_on()
   await bulb.update()
+
+  log.warning('')
 
   if duration==0:
     await set_color_temp(target_value)
@@ -192,61 +195,25 @@ async def transition_color_temp(target_t: int, duration:int):
     step_size = 100 if step_size > 0 else -100
 
   step_size = round_to_nearest_100(step_size)
-  log.debug(f'{step_size=}')
+  log.info(f'{step_size=}')
   #endregion
 
   amount_of_steps = math.ceil(diff / step_size)
   single_sleep_dur = calc_sleep_dur(duration, amount_of_steps)
 
-  log.debug(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
+  log.info(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
 
   await transition(curr_value, target_value, cond, set_color_temp, step_size, single_sleep_dur)
 #endregion Temperature
 ####################
 
 
-async def worker(name, queue):
-  log.info(f'spawning worker {name}')
-  while True:
-    task = await queue.get()
-    await task()
-    queue.task_done()
-    log.info(f'{name} is done')
-    await asyncio.sleep(0.1)
+if __name__ == '__main__':
+  asyncio.run(bulb.update())
 
- 
-async def main():
-  await bulb.update()
   b = 50 if bulb.brightness == 100 else 100
   c = 0 if bulb.color_temp == 6500 else 100
 
-  # with ThreadPoolExecutor() as executor:
-  #   executor.submit(lambda: asyncio.run(change_brightness(b, 5)))
-  #   executor.submit(lambda: asyncio.run(change_temperature(c, 5)))
-
-
-  # await asyncio.gather(change_brightness(b, 1), change_temperature(c, 1))
-
-
-  global queue
-  queue = asyncio.Queue()
-
-  # workers = []
-  for i in range(6):
-    w = asyncio.create_task(worker(f'worker-{i}', queue))
-    # workers.append(w)
-
-  log.info('created workers')
-
-  queue.put_nowait(lambda: change_temperature(c, 5))
-  queue.put_nowait(lambda: change_brightness(b, 5))
-    
-  while True:
-    await queue.join()
-  log.info('done with everything')
-
-
-asyncio.run(main())
-
-# executor = ThreadPoolExecutor()
-# executor.submit(asyncio.run, lambda: main())
+  change_brightness(b, 2)
+  change_temperature(c, 2)
+  
