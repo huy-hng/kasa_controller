@@ -1,6 +1,5 @@
 import asyncio
 import time
-from concurrent.futures import ThreadPoolExecutor
 
 from flask import Flask, request, render_template
 
@@ -61,11 +60,7 @@ def run_task(task, data):
   elif task == 'color_temp':
     fn = controller.change_temperature
 
-  executor.submit(lambda: asyncio.run(fn(target_value, duration, start_value)))
-  # fn(target_value, duration, start_value)
-
-
-  
+  fn(target_value, duration, start_value)
 
   start = ''
   if start_value:
@@ -74,5 +69,4 @@ def run_task(task, data):
   return f'Changed {task}{start} to {target_value} in {duration} seconds.'
 
 
-executor = ThreadPoolExecutor()
 app.run(debug=True, host='0.0.0.0')
