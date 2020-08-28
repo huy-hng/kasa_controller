@@ -1,11 +1,12 @@
 import asyncio
+import time
 
 from flask import Flask, request, render_template
 
 import controller
+from logger import log
 
 app = Flask(__name__)
-
 
 @app.route('/')
 def home():
@@ -18,7 +19,9 @@ def brightness():
     asyncio.run(controller.bulb.update())
     return str(controller.bulb.brightness)
 
+  t0 = time.perf_counter()
   output = run_task('brightness', request.json)
+  log.info(round(time.perf_counter() - t0, 2))
   return output
 
 
@@ -57,7 +60,7 @@ def run_task(task, data):
   elif task == 'color_temp':
     fn = controller.change_temperature
 
-  asyncio.run(fn(target_value, duration, start_value))
+  fn(target_value, duration, start_value)
 
   start = ''
   if start_value:
@@ -65,5 +68,5 @@ def run_task(task, data):
 
   return f'Changed {task}{start} to {target_value} in {duration} seconds.'
 
-if __name__ == '__main__':
-  app.run(debug=True, host='0.0.0.0')
+
+app.run(debug=True, host='0.0.0.0')
