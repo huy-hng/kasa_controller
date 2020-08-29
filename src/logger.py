@@ -33,16 +33,17 @@ consoleHandler.setFormatter(file_formatter)
 consoleHandler.setLevel(logging.INFO)
 log.addHandler(consoleHandler)
 
-def debug():
-	log.debug('tst')
-def info():
-	log.info('tst')
-def warn():
-	log.warning('tst')
-def error():
-	log.error('tst')
 
 if __name__ == '__main__':
+	def debug():
+		log.debug('tst')
+	def info():
+		log.info('tst')
+	def warn():
+		log.warning('tst')
+	def error():
+		log.error('tst')
+		
 	debug()
 	info()
 	warn()

@@ -58,8 +58,8 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 
 		if fn.__name__ == 'set_brightness' and controller.stop_bright or \
 				fn.__name__ == 'set_color_temp' and controller.stop_temp:
-			stop_temp = False
-			stop_bright = False
+			controller.stop_temp = False
+			controller.stop_bright = False
 			break
 
 		await fn(curr_value)

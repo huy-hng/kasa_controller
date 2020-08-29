@@ -3,8 +3,8 @@ import time
 
 from flask import Flask, request, render_template
 
-import controller
-from logger import log
+from . import controller
+from .logger import log
 
 app = Flask(__name__)
 

@@ -1,9 +1,7 @@
 import math
 import asyncio
 
-from src import controller
-from src.controller import bulb
-from src.controller import helpers
+from src.controller import bulb, helpers, SINGLE_CHANGE_DUR
 from src.logger import log
 
 @helpers.runner
@@ -61,7 +59,7 @@ async def transition_bright(target_value: int, duration: int):
 
 
 def get_steps(duration, diff):
-	step_size = (diff * controller.SINGLE_CHANGE_DUR) / (duration)
+	step_size = (diff * SINGLE_CHANGE_DUR) / (duration)
 	
 	if abs(step_size) < 2:
 		step_size = 2 if step_size > 0 else -2
