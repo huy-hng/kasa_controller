@@ -1,11 +1,13 @@
 import math
 import asyncio
 
-from src.controller import bulb, helpers, SINGLE_CHANGE_DUR
+from src import controller
+from src.controller import bulb, helpers
 from src.logger import log
 
 @helpers.runner
 async def change_brightness(target_value: int, duration: int, start_value: int=None):
+	controller.running_bright = True
 	await bulb.turn_on()
 	await bulb.update()
 
@@ -14,12 +16,14 @@ async def change_brightness(target_value: int, duration: int, start_value: int=N
 
 	if duration==0:
 		await set_brightness(target_value)
+		controller.running_bright = False
 		return
 	elif start_value is not None:
 		# use bulb.set_brightness bc set_brightness has a turn off feature
 		await bulb.set_brightness(helpers.perceived2actual_brightness(start_value))
 		
 	await transition_bright(target_value, duration)
+	controller.running_bright = False
 
 
 async def set_brightness(value):
@@ -59,7 +63,7 @@ async def transition_bright(target_value: int, duration: int):
 
 
 def get_steps(duration, diff):
-	step_size = (diff * SINGLE_CHANGE_DUR) / (duration)
+	step_size = (diff * controller.SINGLE_CHANGE_DUR) / (duration)
 	
 	if abs(step_size) < 2:
 		step_size = 2 if step_size > 0 else -2

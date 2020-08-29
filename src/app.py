@@ -17,7 +17,7 @@ def home():
 def brightness():
   if request.method == 'GET':
     asyncio.run(controller.bulb.update())
-    return str(controller.bulb.brightness)
+    return f'brightness={str(controller.bulb.brightness)}\nrunning={controller.running_bright}'
   
   elif request.method == 'POST':
     output = run_task('brightness', request.json)
@@ -32,7 +32,7 @@ def brightness():
 def color_temp():
   if request.method == 'GET':
     asyncio.run(controller.bulb.update())
-    return str(controller.bulb.color_temp)
+    return f'temperature={str(controller.bulb.color_temp)}\nrunning={controller.running_temp}'
 
   elif request.method == 'POST':
     output = run_task('color_temp', request.json)

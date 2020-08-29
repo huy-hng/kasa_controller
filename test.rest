@@ -1,5 +1,5 @@
 # GET https://192.168.188.29:5443/brightness 
-GET http://localhost:5000/brightness
+GET http://localhost:5000/temp
 
 ###
 

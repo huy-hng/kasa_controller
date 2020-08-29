@@ -56,17 +56,18 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 			# check that curr_value doesnt overshoot target_value
 			curr_value = target_value
 
-		if fn.__name__ == 'set_brightness' and controller.stop_bright or \
-				fn.__name__ == 'set_color_temp' and controller.stop_temp:
-			controller.stop_temp = False
+		if fn.__name__ == 'set_brightness' and controller.stop_bright:
 			controller.stop_bright = False
+			break
+		
+		if fn.__name__ == 'set_color_temp' and controller.stop_temp:
+			controller.stop_temp = False
 			break
 
 		await fn(curr_value)
 
 		await asyncio.sleep(single_sleep_dur)
-		# time.sleep(single_sleep_dur)
-
+	
 	t1 = time.perf_counter() - t0
 	# log.debug(f'actual_change_dur={round(t1-sleep_dur, 4)}')
 	log.info(f'actual_complete_dur={round(t1, 4)}')

@@ -1,11 +1,13 @@
 import math
 import asyncio
 
-from src.controller import bulb, helpers, SINGLE_CHANGE_DUR
+from src import controller
+from src.controller import bulb, helpers
 from src.logger import log
 
 @helpers.runner
 async def change_temperature(target_value: int, duration: int, start_value: int=None):
+	controller.running_temp = True
 	await bulb.turn_on()
 	await bulb.update()
 
@@ -13,11 +15,13 @@ async def change_temperature(target_value: int, duration: int, start_value: int=
 
 	if duration==0:
 		await set_color_temp(target_value)
+		controller.running_temp = False
 		return
 	elif start_value is not None:
 		await set_color_temp(start_value)
 		
 	await transition_color_temp(target_value, duration)
+	controller.running_temp = False
 
 
 async def set_color_temp(value):
@@ -34,7 +38,7 @@ async def transition_color_temp(target_t: int, duration:int):
 		return # return when theres no change to make
 
 	#region calc step_size
-	step_size = (diff * SINGLE_CHANGE_DUR) / duration
+	step_size = (diff * controller.SINGLE_CHANGE_DUR) / duration
 
 	if abs(step_size) < 100:
 		step_size = 100 if step_size > 0 else -100
