@@ -5,6 +5,10 @@ GET http://localhost:5000/brightness
 
 
 ###
+DELETE http://localhost:5000/temp
+
+###
+
 
 POST http://localhost:5000/brightness
 content-type: application/json

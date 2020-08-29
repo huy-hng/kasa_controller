@@ -13,26 +13,34 @@ def home():
   return render_template('home.html')
 
 
-@app.route('/brightness', methods=['GET', 'POST'])
+@app.route('/brightness', methods=['GET', 'POST', 'DELETE'])
 def brightness():
   if request.method == 'GET':
     asyncio.run(controller.bulb.update())
     return str(controller.bulb.brightness)
+  
+  elif request.method == 'POST':
+    output = run_task('brightness', request.json)
+    return output
+  
+  elif request.method == 'DELETE':
+    controller.stop_bright = True
+    return 'Stopped brightness change.'
 
-  t0 = time.perf_counter()
-  output = run_task('brightness', request.json)
-  log.info(round(time.perf_counter() - t0, 2))
-  return output
 
-
-@app.route('/temp', methods=['GET', 'POST'])
+@app.route('/temp', methods=['GET', 'POST', 'DELETE'])
 def color_temp():
   if request.method == 'GET':
     asyncio.run(controller.bulb.update())
     return str(controller.bulb.color_temp)
 
-  output = run_task('color_temp', request.json)
-  return output
+  elif request.method == 'POST':
+    output = run_task('color_temp', request.json)
+    return output
+
+  elif request.method == 'DELETE':
+    controller.stop_temp = True
+    return 'Stopped temperature change.'
 
 
 @app.route('/state', methods=['GET', 'POST'])

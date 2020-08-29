@@ -23,8 +23,11 @@ async def slow_task(n):
 
 
 def main():
+  global stopper
+  time.sleep(1)
+  print(stopper)
 
-    slow_task(0)
-    slow_task(1)
+stopper = False
+executor.submit(main)
+stopper = True
 
-main()

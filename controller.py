@@ -14,6 +14,15 @@ SINGLE_CHANGE_DUR = 0.12
 bulb = SmartBulb('10.0.2.23')
 
 
+##################
+#region Variables#
+##################
+
+stop_bright = False
+stop_temp = False
+
+#endregion
+##################
 
 ################
 #region Helpers#
@@ -59,6 +68,8 @@ def calc_sleep_dur(duration, amount_of_steps):
 	return single_sleep_dur
 
 async def transition(curr_value, target_value, cond, fn, step_size, single_sleep_dur):
+	global stop_bright
+	global stop_temp
 	t0 = time.perf_counter()
 	while cond(curr_value):
 		curr_value += step_size
@@ -66,6 +77,12 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 		if not cond(curr_value):
 			# check that curr_value doesnt overshoot target_value
 			curr_value = target_value
+
+		if fn.__name__ == 'set_brightness' and stop_bright or \
+				fn.__name__ == 'set_color_temp' and stop_temp:
+			stop_temp = False
+			stop_bright = False
+			break
 
 		await fn(curr_value)
 
