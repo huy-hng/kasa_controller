@@ -1,5 +1,8 @@
-# GET https://192.168.188.29:5443/brightness 
-GET http://localhost:5000/temp
+DELETE https://10.0.1.101:5443/brightness 
+
+###
+
+DELETE http://localhost:5000/temp
 
 ###
 
