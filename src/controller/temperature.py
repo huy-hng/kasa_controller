@@ -39,7 +39,7 @@ async def transition_color_temp(target_t: int, duration:int):
 		return # return when theres no change to make
 
 	#region calc step_size
-	step_size = (diff * controller.SINGLE_CHANGE_DUR) / duration
+	step_size = (diff * vl.SINGLE_CHANGE_DUR) / duration
 
 	if abs(step_size) < 100:
 		step_size = 100 if step_size > 0 else -100

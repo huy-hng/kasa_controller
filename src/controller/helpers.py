@@ -36,7 +36,7 @@ def get_diff(curr_val, target_val):
 	return diff, cond
 
 def calc_sleep_dur(duration, amount_of_steps):
-	expected_change_dur = controller.SINGLE_CHANGE_DUR * amount_of_steps
+	expected_change_dur = vl.SINGLE_CHANGE_DUR * amount_of_steps
 	sleep_dur = duration - expected_change_dur
 
 	if sleep_dur < 0:
