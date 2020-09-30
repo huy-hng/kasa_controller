@@ -12,13 +12,18 @@ DELETE http://localhost:5000/temp
 
 ###
 
+###
+GET http://localhost:5000/brightness
+
+###
+
 
 POST http://localhost:5000/brightness
 content-type: application/json
 
 {
     "target": 100,
-    "duration": 3
+    "duration": 1
 }
 
 ###
@@ -28,5 +33,5 @@ content-type: application/json
 
 {
     "target": 100,
-    "duration": 3
+    "duration": 5
 }

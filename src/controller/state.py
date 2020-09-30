@@ -17,17 +17,19 @@ class Brightness:
 
 	@actual.setter
 	def actual(self, val):
-		if val < 0 or val > 100:
-			raise Exception('Brightness has to be between 0 and 100.')
+		self.check_valid_range(val)
 		self._actual = val
 		self._perceived = self.actual2perceived_brightness(val)
 
 	@perceived.setter
 	def perceived(self, val):
-		if val < 0 or val > 100:
-			raise Exception('Brightness has to be between 0 and 100.')
+		self.check_valid_range(val)
 		self._perceived = val
 		self._actual = self.perceived2actual_brightness(val)
+
+	def check_valid_range(val):
+		if val < 0 or val > 100:
+			raise Exception('Brightness has to be between 0 and 100.')
 
 	@staticmethod
 	def perceived2actual_brightness(perceived) -> int:
@@ -36,7 +38,6 @@ class Brightness:
 	@staticmethod
 	def actual2perceived_brightness(actual_brightness) -> int:
 		return round(math.sqrt(actual_brightness*100))
-
 
 
 @dataclass
