@@ -2,12 +2,12 @@ import math
 import asyncio
 
 from src import controller
-from src.controller import bulb, helpers
+from src.controller import bulb, helpers, vl
 from src.logger import log
 
 @helpers.runner
 async def change_temperature(target_value: int, duration: int, start_value: int=None):
-	controller.running_temp = True
+	vl.running_temp = True
 	await bulb.turn_on()
 	await bulb.update()
 
@@ -15,18 +15,19 @@ async def change_temperature(target_value: int, duration: int, start_value: int=
 
 	if duration==0:
 		await set_color_temp(target_value)
-		controller.running_temp = False
+		vl.running_temp = False
 		return
 	elif start_value is not None:
 		await set_color_temp(start_value)
 		
 	await transition_color_temp(target_value, duration)
-	controller.running_temp = False
+	vl.running_temp = False
 
 
 async def set_color_temp(value):
 	log.debug(f'change temp to {value}')
-	await bulb.set_color_temp(value)
+	vl.color_temp = value
+	await bulb.set_color_temp(vl.color_temp)
 
 
 async def transition_color_temp(target_t: int, duration:int):

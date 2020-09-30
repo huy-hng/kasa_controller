@@ -1,11 +1,8 @@
 from kasa import SmartBulb
+from src.controller.state import VLamp
 bulb = SmartBulb('10.0.2.23')
 
-stop_bright = False
-stop_temp = False
-
-running_bright = False
-running_temp = False
+vl = VLamp()
 
 SINGLE_CHANGE_DUR = 0.12
 

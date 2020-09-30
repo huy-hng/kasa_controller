@@ -4,27 +4,32 @@ import time
 from flask import Flask, request, render_template
 
 from . import controller
+from .controller import vl
 from .logger import log
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-  return render_template('home.html')
+  return render_template('home.html', vlamp=vl)
 
 
 @app.route('/brightness', methods=['GET', 'POST', 'DELETE'])
 def brightness():
   if request.method == 'GET':
     asyncio.run(controller.bulb.update())
-    return f'brightness={str(controller.bulb.brightness)}\nrunning={controller.running_bright}'
+    return (
+      f'perceived_brightness={str(vl.brightness.perceived)}\n'
+      f'actual_brightness={str(vl.brightness.actual)}\n'
+      f'running={vl.running_bright}'
+    )
   
   elif request.method == 'POST':
     output = run_task('brightness', request.json)
     return output
   
   elif request.method == 'DELETE':
-    controller.stop_bright = True
+    vl.stop_bright = True
     return 'Stopped brightness change.'
 
 
@@ -32,14 +37,14 @@ def brightness():
 def color_temp():
   if request.method == 'GET':
     asyncio.run(controller.bulb.update())
-    return f'temperature={str(controller.bulb.color_temp)}\nrunning={controller.running_temp}'
+    return f'temperature={str(vl.color_temp)}\nrunning={vl.running_temp}'
 
   elif request.method == 'POST':
     output = run_task('color_temp', request.json)
     return output
 
   elif request.method == 'DELETE':
-    controller.stop_temp = True
+    vl.stop_temp = True
     return 'Stopped temperature change.'
 
 
@@ -77,4 +82,3 @@ def run_task(task, data):
   return f'Changed {task}{start} to {target_value} in {duration} seconds.'
 
 
-app.run(debug=True, host='0.0.0.0')

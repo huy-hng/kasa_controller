@@ -5,6 +5,7 @@ from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
 
 from src import controller
+from src.controller import vl
 from src.logger import log
 
 executor = ThreadPoolExecutor()
@@ -15,11 +16,11 @@ def runner(fn):
 		executor.submit(lambda: asyncio.run(fn(*args, **kwargs)))
 	return wrapper
 
-def perceived2actual_brightness(perceived):
-	return round((perceived ** 2) / 100)
+# def perceived2actual_brightness(perceived):
+# 	return round((perceived ** 2) / 100)
 
-def actual2perceived_brightness(actual_brightness):
-	return round(math.sqrt(actual_brightness*100))
+# def actual2perceived_brightness(actual_brightness):
+# 	return round(math.sqrt(actual_brightness*100))
 
 def round_to_nearest_100(x, base=100):
 	return int(base * round(float(x)/base))
@@ -56,12 +57,12 @@ async def transition(curr_value, target_value, cond, fn, step_size, single_sleep
 			# check that curr_value doesnt overshoot target_value
 			curr_value = target_value
 
-		if fn.__name__ == 'set_brightness' and controller.stop_bright:
-			controller.stop_bright = False
+		if fn.__name__ == 'set_brightness' and vl.stop_bright:
+			vl.stop_bright = False
 			break
 		
-		if fn.__name__ == 'set_color_temp' and controller.stop_temp:
-			controller.stop_temp = False
+		if fn.__name__ == 'set_color_temp' and vl.stop_temp:
+			vl.stop_temp = False
 			break
 
 		await fn(curr_value)

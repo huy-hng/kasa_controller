@@ -2,12 +2,12 @@ import math
 import asyncio
 
 from src import controller
-from src.controller import bulb, helpers
+from src.controller import bulb, helpers, vl
 from src.logger import log
 
 @helpers.runner
 async def change_brightness(target_value: int, duration: int, start_value: int=None):
-	controller.running_bright = True
+	vl.running_bright = True
 	await bulb.turn_on()
 	await bulb.update()
 
@@ -16,14 +16,15 @@ async def change_brightness(target_value: int, duration: int, start_value: int=N
 
 	if duration==0:
 		await set_brightness(target_value)
-		controller.running_bright = False
+		vl.running_bright = False
 		return
 	elif start_value is not None:
 		# use bulb.set_brightness bc set_brightness has a turn off feature
-		await bulb.set_brightness(helpers.perceived2actual_brightness(start_value))
+		vl.brightness.perceived = start_value
+		await bulb.set_brightness(vl.brightness.actual)
 		
 	await transition_bright(target_value, duration)
-	controller.running_bright = False
+	vl.running_bright = False
 
 
 async def set_brightness(value):
@@ -32,9 +33,9 @@ async def set_brightness(value):
 		value = 1
 		turn_off = True
 
-	actual_brightness = helpers.perceived2actual_brightness(value)
-	log.debug(f'perceived_brightness={value}|{actual_brightness=}')
-	await bulb.set_brightness(actual_brightness)
+	vl.brightness.perceived = value
+	log.debug(f'brightness={vl.brightness}')
+	await bulb.set_brightness(vl.brightness.actual)
 
 	if turn_off:
 		log.info(f'brightness is 0, turning lamp off')
@@ -43,7 +44,7 @@ async def set_brightness(value):
 
 
 async def transition_bright(target_value: int, duration: int):
-	curr_value = helpers.actual2perceived_brightness(bulb.brightness)
+	curr_value = vl.brightness.perceived # TODO: check if this line introduces bugs
 
 	diff, cond = helpers.get_diff(curr_value, target_value)
 	if diff == 0:
