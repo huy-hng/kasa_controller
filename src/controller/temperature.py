@@ -1,8 +1,8 @@
 import math
 import asyncio
 
-from src import controller
 from src.controller import bulb, helpers, vl
+from src.controller.state import ColorTemperature
 from src.logger import log
 
 @helpers.runner
@@ -31,10 +31,11 @@ async def set_color_temp(value):
 
 
 async def transition_color_temp(target_t: int, duration:int):
-	target_value = 38 * target_t + 2700
+	temp = ColorTemperature()
+	temp.percent = target_t
 	curr_value = bulb.color_temp
 
-	diff, cond = helpers.get_diff(curr_value, target_value)
+	diff, cond = helpers.get_diff(curr_value, temp.kelvin)
 	if diff == 0:
 		return # return when theres no change to make
 
@@ -51,7 +52,6 @@ async def transition_color_temp(target_t: int, duration:int):
 	amount_of_steps = math.ceil(diff / step_size)
 	single_sleep_dur = helpers.calc_sleep_dur(duration, amount_of_steps)
 
-	log.info(f'{curr_value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
+	log.info(f'{curr_value=} {temp.kelvin=} {amount_of_steps=} {single_sleep_dur=}')
 
-	await helpers.transition(curr_value, target_value, cond, set_color_temp, step_size, single_sleep_dur)
-
+	await helpers.transition(curr_value, temp.kelvin, cond, set_color_temp, step_size, single_sleep_dur)

@@ -4,7 +4,6 @@ import asyncio
 from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
 
-from src import controller
 from src.controller import vl
 from src.logger import log
 

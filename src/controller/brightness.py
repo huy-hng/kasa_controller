@@ -1,7 +1,6 @@
 import math
 import asyncio
 
-from src import controller
 from src.controller import bulb, helpers, vl
 from src.logger import log
 
@@ -15,6 +14,7 @@ async def change_brightness(target_value: int, duration: int, start_value: int=N
 	log.info(f'{start_value=} curr_value={bulb.brightness} {target_value=} {duration=}')
 
 	if duration==0:
+		# change immediately
 		await set_brightness(target_value)
 		vl.running_bright = False
 		return
@@ -38,7 +38,7 @@ async def set_brightness(value):
 	await bulb.set_brightness(vl.brightness.actual)
 
 	if turn_off:
-		log.info(f'brightness is 0, turning lamp off')
+		log.info(f'Brightness was set to 0, turning lamp off.')
 		await asyncio.sleep(0.2)
 		await bulb.turn_off()
 
