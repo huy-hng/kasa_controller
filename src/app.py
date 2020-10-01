@@ -48,19 +48,16 @@ def color_temp():
     return 'Stopped temperature change.'
 
 
-@app.route('/state', methods=['GET', 'POST'])
-def state():
-  if request.method == 'GET':
-    asyncio.run(controller.bulb.update())
-    return 'on' if controller.bulb.is_on else 'off'
+@app.route('/on')
+def on():
+  asyncio.run(controller.bulb.update())
+  asyncio.run(controller.bulb.turn_on())
 
-  data = request.json
-  if data['state']:
-    asyncio.run(controller.bulb.turn_on())
-  else:
-    asyncio.run(controller.bulb.turn_off())
+@app.route('/off')
+def off():
+  asyncio.run(controller.bulb.update())
+  asyncio.run(controller.bulb.turn_off())
 
-  return 'done'
 
 def run_task(task, data):
   target_value = data['target']
