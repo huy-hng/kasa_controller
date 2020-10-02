@@ -23,15 +23,19 @@ def run(fn):
 
 
 
-def get_diff(curr_val, target_val):
-	diff = target_val - curr_val
-	if diff > 0:
-		cond = lambda curr_val: curr_val < target_val
-	else:
-		cond = lambda curr_val: curr_val > target_val
+def calc_steps(diff, amount_of_steps, step_size, curr_val, target):
+	step_dir = True if diff > 0 else False
 
-	# log.debug(f'{diff=}')
-	return diff, cond
+	steps = []
+	for _ in range(amount_of_steps):
+		curr_val += step_size
+		if curr_val > target and step_dir or curr_val < target and not step_dir:
+			curr_val = target
+
+		steps.append(curr_val)
+
+	return steps
+
 
 def calc_sleep_dur(duration, amount_of_steps):
 	expected_change_dur = SINGLE_CHANGE_DUR * amount_of_steps

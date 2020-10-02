@@ -29,19 +29,19 @@ class ColorTemperature:
 	def percent(self, val):
 		if val < 0: val = 0
 		elif val > 100: val = 100
-		log.debug(f'{val=}')
 
 		self._percent = val
 		self._kelvin = self.convert_to_kelvin(val)
+		self.set_color_temp()
 
 	@kelvin.setter
 	def kelvin(self, val):
 		if val < 2700: val = 2700
 		elif val > 6500: val = 6500
-		log.debug(f'{val=}')
 
 		self._percent = self.convert_to_percent(val)
 		self._kelvin = val
+		self.set_color_temp()
 
 	@staticmethod
 	def convert_to_percent(kelvin):
@@ -52,11 +52,11 @@ class ColorTemperature:
 		return 38 * percent + 2700
 
 
-	# @helpers.thread
+	@helpers.thread
 	def change_temperature(self, target_value: int, duration: int, start_value: int=None):
+		log.info(f'changing color temp to {target_value}, with duration of {duration}')
 		self.running = True
 
-		log.warning('')
 
 		if duration==0:
 			self.percent = target_value
@@ -71,7 +71,8 @@ class ColorTemperature:
 
 	def transition_color_temp(self, target_percent: int, duration:int):
 		target_kelvin = self.convert_to_kelvin(target_percent)
-		diff, cond = helpers.get_diff(self.kelvin, target_kelvin)
+
+		diff = target_kelvin - self.kelvin
 
 		if diff == 0: return # return when theres no change to make
 
@@ -82,28 +83,26 @@ class ColorTemperature:
 			step_size = 100 if step_size > 0 else -100
 
 		step_size = self.round_to_nearest_100(step_size)
-		log.info(f'{step_size=}')
 		#endregion
 
 		amount_of_steps = math.ceil(diff / step_size)
 		single_sleep_dur = helpers.calc_sleep_dur(duration, amount_of_steps)
 
+		steps = helpers.calc_steps(diff, amount_of_steps, step_size, self.kelvin, target_kelvin)
+
 		log.debug(f'{step_size=}')
 		log.info(f'{self.kelvin=} {target_kelvin=} {duration=} {amount_of_steps=} {single_sleep_dur=}')
 
-		# transition
-		while cond(self.kelvin):
-			self.kelvin += step_size
 
-			if not cond(self.kelvin):
-				# check that self.kelvin doesnt overshoot target_kelvin
-				self.kelvin = target_kelvin
+		# transition
+		for step in steps:
+			self.kelvin = step
+
+			time.sleep(single_sleep_dur)
 
 			if self.should_stop:
 				self.should_stop = False
 				break
-
-			time.sleep(single_sleep_dur)
 
 
 	@staticmethod

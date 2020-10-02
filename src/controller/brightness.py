@@ -29,7 +29,6 @@ class Brightness:
 	@actual.setter
 	def actual(self, val):
 		val = self.check_valid_range(val)
-		log.debug(f'{val=}')
 
 		self._actual = val
 		self._perceived = round(math.sqrt(val*100))
@@ -38,7 +37,6 @@ class Brightness:
 	@perceived.setter
 	def perceived(self, val):
 		val = self.check_valid_range(val)
-		log.debug(f'{val=}')
 
 		self._perceived = val
 		self._actual = round((val ** 2) / 100) 
@@ -55,9 +53,9 @@ class Brightness:
 			
 
 	
-	# @helpers.thread
+	@helpers.thread
 	def change_brightness(self, target_value: int, duration: int, start_value: int=None):
-		log.debug(f'changing brightness to {target_value}, with duration of {duration}')
+		log.info(f'changing brightness to {target_value}, with duration of {duration}')
 		self.running = True
 
 		if duration==0:
@@ -75,28 +73,28 @@ class Brightness:
 	def transition_bright(self, target_value: int, duration: int):
 		log.debug(f'transitioning')
 
-		diff, cond = helpers.get_diff(self.perceived, target_value)
+		diff = target_value - self.perceived
+
 		if diff == 0: return # return when theres no change to make
 
 		amount_of_steps, step_size = self.get_steps(duration, diff)
 		single_sleep_dur = helpers.calc_sleep_dur(duration, amount_of_steps)
 
+		steps = helpers.calc_steps(diff, amount_of_steps, step_size, self.perceived, target_value)
+
+		log.info(f'{steps=}')
 		log.info(f'{self.perceived=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
 		
 		# transition
-		while cond(self.perceived):
-			self.perceived += step_size
+		for step in steps:
+			self.perceived = step
 
-			if not cond(self.perceived):
-				# check that self.perceived doesnt overshoot target_value
-				self.perceived = target_value
+			time.sleep(single_sleep_dur)
 
 			if self.should_stop:
 				self.should_stop = False
 				break
-			
-			time.sleep(single_sleep_dur)
-
+		
 
 	@staticmethod
 	def get_steps(duration, diff):
