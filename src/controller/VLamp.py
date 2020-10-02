@@ -9,7 +9,8 @@ from src.logger import log
 
 
 class VLamp:
-	def __init__(self):
+	def __init__(self, name):
+		self.name: str = name
 		self.lamp_access = False
 
 		self.brightness = Brightness(set_brightness=self.set_brightness)
@@ -30,9 +31,12 @@ class VLamp:
 			await controller.bulb.set_brightness(self.brightness.actual)
 
 			if turn_off:
+				# FIX: turning off doesnt work
 				log.info(f'Brightness was set to 0, turning lamp off.')
 				await asyncio.sleep(0.2)
 				await controller.bulb.turn_off()
+		else:
+			log.warning(f'{self.name} has no lamp access.')
 
 
 	@helpers.run
@@ -43,4 +47,6 @@ class VLamp:
 
 			log.info(f'Changing color temperature to {self.color_temp.kelvin}.')
 			await controller.bulb.set_color_temp(self.color_temp.kelvin)
+		else:
+			log.warning(f'{self.name} has no lamp access.')
 		
