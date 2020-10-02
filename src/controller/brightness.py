@@ -63,7 +63,7 @@ class Brightness:
 			return
 		elif start_value is not None:
 			self.perceived = start_value
-			
+
 		self.transition_bright(target_value, duration)
 		self.running = False
 
