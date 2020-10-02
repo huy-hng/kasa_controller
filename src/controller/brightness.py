@@ -45,10 +45,8 @@ class Brightness:
 
 	@staticmethod
 	def check_valid_range(val):
-		if val < 0:
-			val = 0
-		elif val > 100:
-			val = 100
+		if val < 0: val = 0
+		elif val > 100: val = 100
 		return val
 			
 
