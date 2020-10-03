@@ -1,9 +1,10 @@
 import math
 import typing
 import time
+import asyncio
 from dataclasses import dataclass
 
-from src.controller import helpers, SINGLE_CHANGE_DUR
+from src.controller import helpers, SINGLE_CHANGE_DUR, bulb
 from src.logger import log
 
 
@@ -56,7 +57,7 @@ class ColorTemperature:
 	def change_temperature(self, target_value: int, duration: int, start_value: int=None):
 		log.info(f'changing color temp to {target_value}, with duration of {duration}')
 		self.running = True
-
+		asyncio.run(bulb.update())
 
 		if duration==0:
 			self.percent = target_value
