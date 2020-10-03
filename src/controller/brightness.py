@@ -4,7 +4,7 @@ import asyncio
 import typing
 from dataclasses import dataclass
 
-from src.controller import helpers, SINGLE_CHANGE_DUR
+from src.controller import helpers, SINGLE_CHANGE_DUR, bulb
 from src.logger import log
 
 
@@ -32,7 +32,6 @@ class Brightness:
 
 		self._actual = val
 		self._perceived = round(math.sqrt(val*100))
-		self.set_brightness()
 
 	@perceived.setter
 	def perceived(self, val):
@@ -40,7 +39,6 @@ class Brightness:
 
 		self._perceived = val
 		self._actual = round((val ** 2) / 100) 
-		self.set_brightness()
 
 
 	@staticmethod
@@ -55,14 +53,17 @@ class Brightness:
 	def change_brightness(self, target_value: int, duration: int, start_value: int=None):
 		log.info(f'changing brightness to {target_value}, with duration of {duration}')
 		self.running = True
+		asyncio.run(bulb.update())
 
 		if duration==0:
 			# change immediately
 			self.perceived = target_value
+			self.set_brightness()
 			self.running = False
 			return
 		elif start_value is not None:
 			self.perceived = start_value
+			self.set_brightness()
 
 		self.transition_bright(target_value, duration)
 		self.running = False
@@ -86,6 +87,7 @@ class Brightness:
 		# transition
 		for step in steps:
 			self.perceived = step
+			self.set_brightness()
 
 			time.sleep(single_sleep_dur)
 
