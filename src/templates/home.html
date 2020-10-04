@@ -19,12 +19,21 @@
 <br> -->
 <div class="card">
     <div class="card-body">
+        <h3>Lamp</h3>
+        Override: {{ not vlc.nvl.lamp_access }}
+    </div>
+</div>
+
+<br>
+
+<div class="card">
+    <div class="card-body">
         <h3>Brightness</h3>
-        Perceived: {{ vlamp.brightness.perceived }}
+        Perceived: {{ vlc.active_vlamp.brightness.perceived }}%
         <br>
-        Actual: {{ vlamp.brightness.actual }}
+        Actual: {{ vlc.active_vlamp.brightness.actual }}%
         <br>
-        Is running: {{ vlamp.running_bright}}
+        Is running: {{ vlc.active_vlamp.brightness.running}}
     </div>
 </div>
 
@@ -33,9 +42,11 @@
 <div class="card">
     <div class="card-body">
         <h3>Temperature</h3>
-        Kelvin: {{ vlamp.color_temp }}
+        Percent: {{ vlc.active_vlamp.color_temp.percent }}%
         <br>
-        Is running: {{ vlamp.running_temp}}
+        Kelvin: {{ vlc.active_vlamp.color_temp.kelvin }}
+        <br>
+        Is running: {{ vlc.active_vlamp.color_temp.running}}
     </div>
 </div>
 

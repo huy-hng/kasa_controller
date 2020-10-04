@@ -64,6 +64,8 @@ class Brightness:
 		elif start_value is not None:
 			self.perceived = start_value
 			self.set_brightness()
+			time.sleep(1)
+
 
 		self.transition_bright(target_value, duration)
 		self.running = False

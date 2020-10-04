@@ -45,16 +45,16 @@ class ColorTemperature:
 		self.set_color_temp()
 
 	@staticmethod
-	def convert_to_percent(kelvin):
-		return (kelvin - 2700) / 38
+	def convert_to_percent(kelvin) -> int:
+		return int((kelvin - 2700) / 38)
 
 	@staticmethod
-	def convert_to_kelvin(percent):
-		return 38 * percent + 2700
+	def convert_to_kelvin(percent) -> int:
+		return int(38 * percent + 2700)
 
 
 	@helpers.thread
-	def change_temperature(self, target_value: int, duration: int, start_value: int=None):
+	def change_color_temp(self, target_value: int, duration: int, start_value: int=None):
 		log.info(f'changing color temp to {target_value}, with duration of {duration}')
 		self.running = True
 		asyncio.run(bulb.update())
@@ -65,6 +65,7 @@ class ColorTemperature:
 			return
 		elif start_value is not None:
 			self.percent = target_value
+			time.sleep(1)
 
 		self.transition_color_temp(target_value, duration)
 		self.running = False

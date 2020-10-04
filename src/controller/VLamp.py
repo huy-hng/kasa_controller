@@ -14,7 +14,9 @@ class VLamp:
 		self.lamp_access = False
 
 		self.brightness = Brightness(set_brightness=self.set_brightness)
+		self.brightness.actual = bulb.brightness
 		self.color_temp = ColorTemperature(set_color_temp=self.set_color_temp)
+		self.color_temp.kelvin = bulb.color_temp
 
 	@helpers.run
 	async def set_brightness(self):
@@ -37,7 +39,7 @@ class VLamp:
 				await asyncio.sleep(0.5)
 				await bulb.turn_off()
 		else:
-			log.warning(f'{self.name} has no lamp access.')
+			log.debug(f'{self.name} has no lamp access.')
 
 
 	@helpers.run
@@ -50,5 +52,32 @@ class VLamp:
 			log.info(f'Changing color temperature to {self.color_temp.kelvin}.')
 			await bulb.set_color_temp(self.color_temp.kelvin)
 		else:
-			log.warning(f'{self.name} has no lamp access.')
+			log.debug(f'{self.name} has no lamp access.')
 		
+	@property
+	def is_running(self):
+		if self.brightness.running or self.color_temp.running:
+			return True
+		return False
+
+	def override(self):
+		
+		self.lamp_access = False
+		ovl = VLamp('override')
+		ovl.lamp_access = True
+		ovl.brightness.perceived = self.brightness.perceived
+		ovl.color_temp.kelvin = self.color_temp.kelvin
+
+		return ovl
+
+	def disengage(self, vlamp, duration=1):
+		""" disengages this vlamp and engages the vlamp given as param """
+		log.info(f'Disengaging {self.name}, changing lamp access to {vlamp.name}')
+
+		self.brightness.change_brightness(vlamp.brightness.perceived, duration)
+		self.color_temp.change_color_temp(vlamp.color_temp.percent, duration)
+
+		time.sleep(duration*1.1)
+
+		self.lamp_access = False
+		vlamp.lamp_access = True

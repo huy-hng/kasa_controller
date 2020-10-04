@@ -1,11 +1,8 @@
-import time
-import math
 import asyncio
 from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
 
-SINGLE_CHANGE_DUR = 0.12
-from src.logger import log
+from src.controller import SINGLE_CHANGE_DUR
 
 executor = ThreadPoolExecutor()
 
