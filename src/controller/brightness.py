@@ -7,6 +7,8 @@ from dataclasses import dataclass
 from src.controller import helpers, SINGLE_CHANGE_DUR, bulb
 from src.logger import log
 
+# pylint: disable=logging-fstring-interpolation
+# pylint: disable=multiple-statements
 
 @dataclass
 class Brightness:
@@ -72,7 +74,7 @@ class Brightness:
 
 
 	def transition_bright(self, target_value: int, duration: int):
-		log.debug(f'transitioning')
+		log.debug('transitioning')
 
 		diff = target_value - self.perceived
 

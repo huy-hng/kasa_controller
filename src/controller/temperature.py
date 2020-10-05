@@ -7,6 +7,7 @@ from dataclasses import dataclass
 from src.controller import helpers, SINGLE_CHANGE_DUR, bulb
 from src.logger import log
 
+# pylint: disable=logging-fstring-interpolation
 
 @dataclass
 class ColorTemperature:

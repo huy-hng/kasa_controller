@@ -1,4 +1,3 @@
-import math
 import asyncio
 import time
 
@@ -7,6 +6,7 @@ from src.controller.brightness import Brightness
 from src.controller.temperature import ColorTemperature
 from src.logger import log
 
+# pylint: disable=logging-fstring-interpolation
 
 class VLamp:
 	def __init__(self, name):
@@ -22,7 +22,7 @@ class VLamp:
 	async def set_brightness(self):
 		if self.lamp_access:
 			if not bulb.is_on:
-				log.debug(f'Lamp is off, turning on.')
+				log.debug('Lamp is off, turning on.')
 				await bulb.turn_on()
 				await bulb.update()
 
@@ -35,7 +35,7 @@ class VLamp:
 			await bulb.set_brightness(self.brightness.actual)
 
 			if turn_off:
-				log.info(f'Brightness was set to 0, turning lamp off.')
+				log.info('Brightness was set to 0, turning lamp off.')
 				await asyncio.sleep(0.5)
 				await bulb.turn_off()
 		else:
