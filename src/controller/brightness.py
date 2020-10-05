@@ -52,7 +52,7 @@ class Brightness:
 
 	
 	@helpers.thread
-	def change_brightness(self, target_value: int, duration: int, start_value: int=None):
+	def change(self, target_value: int, duration: int, start_value: int=None):
 		log.info(f'changing brightness to {target_value}, with duration of {duration}')
 		self.running = True
 		asyncio.run(bulb.update())
@@ -69,11 +69,11 @@ class Brightness:
 			time.sleep(1)
 
 
-		self.transition_bright(target_value, duration)
+		self.transition(target_value, duration)
 		self.running = False
 
 
-	def transition_bright(self, target_value: int, duration: int):
+	def transition(self, target_value: int, duration: int):
 		log.debug('transitioning')
 
 		diff = target_value - self.perceived

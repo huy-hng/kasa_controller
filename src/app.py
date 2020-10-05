@@ -5,6 +5,9 @@ from flask import Flask, request, render_template
 
 from . import controller
 from .controller import vlc
+from .controller.brightness import Brightness
+from .controller.temperature import ColorTemperature
+
 # from .logger import log
 
 app = Flask(__name__)
@@ -58,12 +61,8 @@ def brightness(target=None, duration=0, start_value=None):
     if curr_brightness.running:
       curr_brightness.should_stop = True
       time.sleep(1)
-    curr_brightness.change_brightness(target, int(duration), start_value)
+    curr_brightness.change(target, int(duration), start_value)
     return str(target)
-  
-  elif request.method == 'POST':
-    output = run_task(curr_brightness.change_brightness, request.json)
-    return output
   
   elif request.method == 'DELETE':
     curr_brightness.should_stop = True
@@ -84,12 +83,8 @@ def color_temp(target=None, duration=0, start_value=None):
     target = int(target) if target else None
     start_value = int(start_value) if start_value else None
 
-    curr_color_temp.change_color_temp(target, int(duration), start_value)
+    curr_color_temp.change(target, int(duration), start_value)
     return str(target)
-
-  elif request.method == 'POST':
-    output = run_task(curr_color_temp.change_color_temp, request.json)
-    return output
 
   elif request.method == 'DELETE':
     curr_color_temp.should_stop = True
@@ -97,16 +92,20 @@ def color_temp(target=None, duration=0, start_value=None):
 
 
 
+def change(instance: Brightness, target=None, duration=0, start_value=None):
+  if vlc.is_normal_mode():
+    vlc.new_override()
 
-def run_task(fn, data):
-  target_value = data['target']
-  duration = data['duration']
-  start_value = data.get('start_value')
+  if request.method == 'GET':
+    target = int(target) if target else None
+    start_value = int(start_value) if start_value else None
 
-  fn(target_value, duration, start_value)
-
-  start = ''
-  if start_value:
-    start = f' from {start_value}'
-
-  return f'Changed {start} to {target_value} in {duration} seconds.'
+    if instance.running:
+      instance.should_stop = True
+      time.sleep(1)
+    instance.change(target, int(duration), start_value)
+    return str(target)
+  
+  elif request.method == 'DELETE':
+    instance.should_stop = True
+    return 'Stopping current brightness change.'

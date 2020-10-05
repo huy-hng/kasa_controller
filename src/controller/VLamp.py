@@ -74,8 +74,8 @@ class VLamp:
 		""" disengages this vlamp and engages the vlamp given as param """
 		log.info(f'Disengaging {self.name}, changing lamp access to {vlamp.name}')
 
-		self.brightness.change_brightness(vlamp.brightness.perceived, duration)
-		self.color_temp.change_color_temp(vlamp.color_temp.percent, duration)
+		self.brightness.change(vlamp.brightness.perceived, duration)
+		self.color_temp.change(vlamp.color_temp.percent, duration)
 
 		time.sleep(duration*1.1)
 

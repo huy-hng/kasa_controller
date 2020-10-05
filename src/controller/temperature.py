@@ -55,7 +55,7 @@ class ColorTemperature:
 
 
 	@helpers.thread
-	def change_color_temp(self, target_value: int, duration: int, start_value: int=None):
+	def change(self, target_value: int, duration: int, start_value: int=None):
 		log.info(f'changing color temp to {target_value}, with duration of {duration}')
 		self.running = True
 		asyncio.run(bulb.update())
@@ -68,11 +68,11 @@ class ColorTemperature:
 			self.percent = target_value
 			time.sleep(1)
 
-		self.transition_color_temp(target_value, duration)
+		self.transition(target_value, duration)
 		self.running = False
 
 
-	def transition_color_temp(self, target_percent: int, duration:int):
+	def transition(self, target_percent: int, duration:int):
 		target_kelvin = self.convert_to_kelvin(target_percent)
 
 		diff = target_kelvin - self.kelvin
