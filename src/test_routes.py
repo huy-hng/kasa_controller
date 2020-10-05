@@ -3,7 +3,7 @@ import requests
 
 endpoint = 'http://0.0.0.0:5000/'
 
-# requests.get(endpoint+'brightness/80')
+# requests.get(endpoint+'brightness/30')
 # time.sleep(2)
 # requests.get(endpoint+'brightness/1/3')
 # time.sleep(2)
