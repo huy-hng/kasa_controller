@@ -20,6 +20,7 @@
 <div class="card">
     <div class="card-body">
         <h3>Lamp</h3>
+        <button id="override" type="button" class="btn btn-danger">Override</button>
         Override: {{ not vlc.nvl.lamp_access }}
     </div>
 </div>
@@ -49,5 +50,17 @@
         Is running: {{ vlc.active_vlamp.color_temp.running}}
     </div>
 </div>
+
+<script>
+    let button = document.getElementById('override')
+    console.log('{{ vlc.nvl.lamp_access }}');
+    if ('{{ vlc.nvl.lamp_access }}') {
+        button.classList.remove('btn-danger')
+        button.classList.add('btn-secondary')
+    } else {
+        button.classList.remove('btn-secondary')
+        button.classList.add('btn-danger')
+    }
+</script>
 
 {% endblock content %}
