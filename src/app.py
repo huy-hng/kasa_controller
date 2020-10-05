@@ -5,13 +5,28 @@ from flask import Flask, request, render_template
 
 from . import controller
 from .controller import vlc
-from .logger import log
+# from .logger import log
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
   return render_template('home.html', vlc=vlc)
+
+
+
+@app.route('/on')
+def on():
+  asyncio.run(controller.bulb.update())
+  asyncio.run(controller.bulb.turn_on())
+  return 'on'
+
+@app.route('/off')
+def off():
+  asyncio.run(controller.bulb.update())
+  asyncio.run(controller.bulb.turn_off())
+  return 'off'
+
 
 # @app.route('/lamp/override', methods=['GET'])
 @app.route('/lamp', methods=['GET', 'DELETE'])
@@ -22,6 +37,7 @@ def lamp():
   if request.method == 'DELETE':
     vlc.disengage()
     return 'returning to nvl'
+  return 'what'
 
 
 
@@ -80,17 +96,6 @@ def color_temp(target=None, duration=0, start_value=None):
     return 'Stopping current color temp change.'
 
 
-@app.route('/on')
-def on():
-  asyncio.run(controller.bulb.update())
-  asyncio.run(controller.bulb.turn_on())
-  return 'on'
-
-@app.route('/off')
-def off():
-  asyncio.run(controller.bulb.update())
-  asyncio.run(controller.bulb.turn_off())
-  return 'off'
 
 
 def run_task(fn, data):
