@@ -8,6 +8,7 @@ flask = "*"
 flask-restful = "*"
 python-kasa = "*"
 astral = "*"
+timeloop = "*"
 
 [dev-packages]
 
