@@ -1,66 +1,82 @@
 {% extends "layout.html" %}
 {% block content %}
 <!-- <div class="card">
-    <div class="card-body">
-        Available routes:
-        <ul>
-            <li><a href="/brightness">/brightness</a> - GET or POST</li>
-            <li><a href="/temp">/temp</a> - GET or POST</li>
-        </ul>
-        Both take a json with the following keys:
-        </br>
-        {
-        "target": [from 0 to 100],
-        "duration": [in seconds]
-        }
-    </div>
+	<div class="card-body">
+		Available routes:
+		<ul>
+			<li><a href="/brightness">/brightness</a> - GET or POST</li>
+			<li><a href="/temp">/temp</a> - GET or POST</li>
+		</ul>
+		Both take a json with the following keys:
+		</br>
+		{
+		"target": [from 0 to 100],
+		"duration": [in seconds]
+		}
+	</div>
 </div>
 
 <br> -->
 <div class="card">
-    <div class="card-body">
-        <h3>Lamp</h3>
-        <button id="override" type="button" class="btn btn-danger">Override</button>
-        Override: {{ not vlc.nvl.lamp_access }}
-    </div>
+	<div class="card-body">
+		<h3>Lamp</h3>
+		<button id="override" type="button" class="btn btn-danger" onclick="clicked()">Override</button>
+		Override: {{ not vlc.nvl.lamp_access }}
+	</div>
 </div>
 
 <br>
 
 <div class="card">
-    <div class="card-body">
-        <h3>Brightness</h3>
-        Perceived: {{ vlc.active_vlamp.brightness.perceived }}%
-        <br>
-        Actual: {{ vlc.active_vlamp.brightness.actual }}%
-        <br>
-        Is running: {{ vlc.active_vlamp.brightness.running}}
-    </div>
+	<div class="card-body">
+		<h3>Brightness</h3>
+		Perceived: {{ vlc.active_vlamp.brightness.perceived }}%
+		<br>
+		Actual: {{ vlc.active_vlamp.brightness.actual }}%
+		<br>
+		Is running: {{ vlc.active_vlamp.brightness.running}}
+	</div>
 </div>
 
 <br>
 
 <div class="card">
-    <div class="card-body">
-        <h3>Temperature</h3>
-        Percent: {{ vlc.active_vlamp.color_temp.percent }}%
-        <br>
-        Kelvin: {{ vlc.active_vlamp.color_temp.kelvin }}
-        <br>
-        Is running: {{ vlc.active_vlamp.color_temp.running}}
-    </div>
+	<div class="card-body">
+		<h3>Temperature</h3>
+		Percent: {{ vlc.active_vlamp.color_temp.percent }}%
+		<br>
+		Kelvin: {{ vlc.active_vlamp.color_temp.kelvin }}
+		<br>
+		Is running: {{ vlc.active_vlamp.color_temp.running}}
+	</div>
 </div>
 
 <script>
-    let button = document.getElementById('override')
-    console.log('{{ vlc.nvl.lamp_access }}');
-    if ('{{ vlc.nvl.lamp_access }}') {
-        button.classList.remove('btn-danger')
-        button.classList.add('btn-secondary')
-    } else {
-        button.classList.remove('btn-secondary')
-        button.classList.add('btn-danger')
-    }
+	setButton()
+
+	function clicked() {
+		let lamp_access = setButton()
+		let requestMethod = lamp_access ? 'GET' : 'DELETE';
+		console.log(requestMethod);
+
+		fetch('http://localhost:5000/lamp', {
+			method: requestMethod
+		})
+	}
+
+	function setButton() {
+		let button = document.getElementById('override')
+		let lamp_access = eval('{{ vlc.nvl.lamp_access }}'.toLocaleLowerCase())
+		console.log(lamp_access);
+		if (lamp_access) {
+			button.classList.remove('btn-danger')
+			button.classList.add('btn-secondary')
+		} else {
+			button.classList.remove('btn-secondary')
+			button.classList.add('btn-danger')
+		}
+		return lamp_access;
+	}
 </script>
 
 {% endblock content %}
