@@ -15,18 +15,11 @@ def check_values():
 	if brightness.actual != bulb.brightness:
 		brightness.actual = bulb.brightness
 
-	color_temp = vlc.active_vlamp.brightness
+	color_temp = vlc.active_vlamp.color_temp
 	if color_temp.kelvin != bulb.color_temp:
 		color_temp.kelvin = bulb.color_temp
 
 @tl.job(interval=timedelta(seconds=20))
 def check_time():
-	sunset_start = profiles.s.sunset_start()
-	sunset_duration = profiles.s.sunset_duration()
-
-	if compare_time(sunset_start.hour, sunset_start.minute):
-		vlc.nvl.color_temp.change(0, sunset_duration)
-
-
-
-
+	profiles.sunset()
+	profiles.late()
