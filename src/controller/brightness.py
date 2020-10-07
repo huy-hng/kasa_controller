@@ -52,7 +52,7 @@ class Brightness:
 
 	
 	@helpers.thread
-	def change(self, target_value: int, duration: int, start_value: int=None):
+	def change(self, target_value: int, duration: int=0, start_value: int=None):
 		log.info(f'changing brightness to {target_value}, with duration of {duration}')
 		self.running = True
 		asyncio.run(bulb.update())
