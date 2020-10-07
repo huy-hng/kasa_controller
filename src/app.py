@@ -43,52 +43,72 @@ def lamp():
   return 'what'
 
 
+def change_brightness(vl, method, target, duration, start_value):
+  if method == 'GET':
+    target = int(target) if target else None
+    start_value = int(start_value) if start_value else None
 
-@app.route('/brightness', methods=['POST', 'DELETE'])
+    if vl.brightness.running:
+      vl.brightness.should_stop = True
+      time.sleep(1)
+    vl.brightness.change(target, int(duration), start_value)
+    return str(target)
+  
+  elif method == 'DELETE':
+    vl.brightness.should_stop = True
+    return 'Stopping current brightness change.'
+
+
+
+@app.route('/brightness', methods=['DELETE'])
 @app.route('/brightness/<target>')
 @app.route('/brightness/<target>/<duration>')
 @app.route('/brightness/<target>/<duration>/<start_value>')
 def brightness(target=None, duration=0, start_value=None):
   if vlc.is_normal_mode():
     vlc.new_override()
+  change_brightness(vlc.ovl, request.method, target, duration, start_value)
 
-  curr_brightness = vlc.ovl.brightness
+  
+@app.route('/nvl/brightness', methods=['DELETE'])
+@app.route('/nvl/brightness/<target>')
+@app.route('/nvl/brightness/<target>/<duration>')
+@app.route('/nvl/brightness/<target>/<duration>/<start_value>')
+def nvl_brightness(target=None, duration=0, start_value=None):
+  change_brightness(vlc.nvl, request.method, target, duration, start_value)
+
+
+
+def change_color_temp(vl, method):
 
   if request.method == 'GET':
     target = int(target) if target else None
     start_value = int(start_value) if start_value else None
 
-    if curr_brightness.running:
-      curr_brightness.should_stop = True
-      time.sleep(1)
-    curr_brightness.change(target, int(duration), start_value)
+    vl.color_temp.change(target, int(duration), start_value)
     return str(target)
-  
+
   elif request.method == 'DELETE':
-    curr_brightness.should_stop = True
-    return 'Stopping current brightness change.'
+    vl.color_temp.should_stop = True
+    return 'Stopping current color temp change.'
 
 
-@app.route('/temp', methods=['POST', 'DELETE'])
+@app.route('/temp', methods=['DELETE'])
 @app.route('/temp/<target>')
 @app.route('/temp/<target>/<duration>')
 @app.route('/temp/<target>/<duration>/<start_value>')
 def color_temp(target=None, duration=0, start_value=None):
   if vlc.is_normal_mode():
     vlc.new_override()
+  change_color_temp(vlc.ovl, request.method, target, duration, start_value)
 
-  curr_color_temp = vlc.ovl.color_temp
 
-  if request.method == 'GET':
-    target = int(target) if target else None
-    start_value = int(start_value) if start_value else None
-
-    curr_color_temp.change(target, int(duration), start_value)
-    return str(target)
-
-  elif request.method == 'DELETE':
-    curr_color_temp.should_stop = True
-    return 'Stopping current color temp change.'
+@app.route('/nvl/temp', methods=['DELETE'])
+@app.route('/nvl/temp/<target>')
+@app.route('/nvl/temp/<target>/<duration>')
+@app.route('/nvl/temp/<target>/<duration>/<start_value>')
+def nvl_color_temp(target=None, duration=0, start_value=None):
+  change_color_temp(vlc.nvl, request.method, target, duration, start_value)
 
 
 
