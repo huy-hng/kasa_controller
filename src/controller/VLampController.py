@@ -40,6 +40,10 @@ class VLampController:
 		""" disengages this vlamp and engages the vlamp given as param """
 		log.info('Disengaging override, changing lamp access to nvl')
 
+		# TODO: make it change back no matter what
+		# currently it stops when a new command comes in, which leads to 
+		# nvl having the wrong values
+		# (after disengage comes ovl loosing lamp access, then nvl getting current actual lamp values)
 		self.ovl.brightness.change(self.nvl.brightness.perceived, duration)
 		self.ovl.color_temp.change(self.nvl.color_temp.percent, duration)
 
