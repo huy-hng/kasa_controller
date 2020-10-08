@@ -52,8 +52,10 @@ class Brightness:
 
 	
 	@helpers.thread
-	def change(self, target_value: int, duration: int=0, start_value: int=None):
+	def change(self, target_value: int, duration: int=0, start_value: int=None, abort_new=False):
 		log.info(f'changing brightness to {target_value}, with duration of {duration}')
+		if abort_new:
+			return
 
 		self.wait_for_stop()
 

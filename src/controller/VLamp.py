@@ -14,6 +14,8 @@ class VLamp:
 		self.name = name
 		self.lamp_access = False
 
+
+		# TODO: refactor brightness and colortemperature to parent class
 		self.brightness = Brightness(set_brightness=self.set_brightness)
 		self.brightness.actual = bulb.brightness
 		self.color_temp = ColorTemperature(set_color_temp=self.set_color_temp)
