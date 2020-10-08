@@ -11,6 +11,8 @@ tl = Timeloop()
 def check_values():
 	asyncio.run(bulb.update())
 
+	# TODO: if manual change, switch to override vl
+
 	brightness = vlc.active_vlamp.brightness
 	if brightness.actual != bulb.brightness:
 		brightness.actual = bulb.brightness

@@ -43,7 +43,12 @@ class VLampController:
 		self.ovl.brightness.change(self.nvl.brightness.perceived, duration)
 		self.ovl.color_temp.change(self.nvl.color_temp.percent, duration)
 
-		time.sleep(duration*1.1)
+		time.sleep(0.5)
+
+		while self.ovl.is_running:
+			time.sleep(0.1)
+
+		log.debug(f'running done')
 
 		
 	def is_normal_mode(self):
