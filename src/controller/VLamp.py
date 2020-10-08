@@ -9,8 +9,9 @@ from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 class VLamp:
-	def __init__(self, name):
-		self.name: str = name
+	def __init__(self, id: int, name: str):
+		self.id = id
+		self.name = name
 		self.lamp_access = False
 
 		self.brightness = Brightness(set_brightness=self.set_brightness)
@@ -59,25 +60,3 @@ class VLamp:
 		if self.brightness.running or self.color_temp.running:
 			return True
 		return False
-
-	def override(self):
-		
-		self.lamp_access = False
-		ovl = VLamp('override')
-		ovl.lamp_access = True
-		ovl.brightness.perceived = self.brightness.perceived
-		ovl.color_temp.kelvin = self.color_temp.kelvin
-
-		return ovl
-
-	def disengage(self, vlamp, duration=1):
-		""" disengages this vlamp and engages the vlamp given as param """
-		log.info(f'Disengaging {self.name}, changing lamp access to {vlamp.name}')
-
-		self.brightness.change(vlamp.brightness.perceived, duration)
-		self.color_temp.change(vlamp.color_temp.percent, duration)
-
-		time.sleep(duration*1.1)
-
-		self.lamp_access = False
-		vlamp.lamp_access = True
