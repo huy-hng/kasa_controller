@@ -17,11 +17,32 @@
 </div>
 
 <br> -->
+
+<br>
 <div class="card">
 	<div class="card-body">
-		<h3>Lamp</h3>
-		<button id="override" type="button" class="btn btn-danger" onclick="clicked()">Override</button>
-		Override: {{ not vlc.nvl.lamp_access }}
+		<h3>{{vlc.nvl.name}}</h3>
+
+		<br>
+		<button id="active{{vlc.nvl.id}}" type="button" class="btn btn-success"
+			onclick="set_active('{{vlc.nvl.id}}')">Active</button>
+		<hr>
+
+		<h4>Brightness</h4>
+		Perceived: {{ vlc.nvl.brightness.perceived }}%
+		<br>
+		Actual: {{ vlc.nvl.brightness.actual }}%
+		<br>
+		Is running: {{ vlc.nvl.brightness.running}}
+
+		<hr>
+
+		Percent: {{ vlc.nvl.color_temp.percent }}%
+		<br>
+		Kelvin: {{ vlc.nvl.color_temp.kelvin }}
+		<br>
+		Is running: {{ vlc.nvl.color_temp.running}}
+
 	</div>
 </div>
 
@@ -29,54 +50,64 @@
 
 <div class="card">
 	<div class="card-body">
-		<h3>Brightness</h3>
-		Perceived: {{ vlc.active_vlamp.brightness.perceived }}%
-		<br>
-		Actual: {{ vlc.active_vlamp.brightness.actual }}%
-		<br>
-		Is running: {{ vlc.active_vlamp.brightness.running}}
-	</div>
-</div>
+		<h3>{{vlc.ovl.name}}</h3>
 
-<br>
+		<br>
+		<button id="active{{vlc.ovl.id}}" type="button" class="btn btn-success"
+			onclick="set_active('{{vlc.ovl.id}}')">Active</button>
+		<hr>
 
-<div class="card">
-	<div class="card-body">
-		<h3>Temperature</h3>
-		Percent: {{ vlc.active_vlamp.color_temp.percent }}%
+		<h4>Brightness</h4>
+		Perceived: {{ vlc.ovl.brightness.perceived }}%
 		<br>
-		Kelvin: {{ vlc.active_vlamp.color_temp.kelvin }}
+		Actual: {{ vlc.ovl.brightness.actual }}%
 		<br>
-		Is running: {{ vlc.active_vlamp.color_temp.running}}
+		Is running: {{ vlc.ovl.brightness.running}}
+
+		<hr>
+
+		Percent: {{ vlc.ovl.color_temp.percent }}%
+		<br>
+		Kelvin: {{ vlc.ovl.color_temp.kelvin }}
+		<br>
+		Is running: {{ vlc.ovl.color_temp.running}}
+
 	</div>
 </div>
 
 <script>
-	setButton()
+	let button0 = document.getElementById('active0')
+	let button1 = document.getElementById('active1')
 
-	function clicked() {
-		let lamp_access = setButton()
-		let requestMethod = lamp_access ? 'GET' : 'DELETE';
-		console.log(requestMethod);
+	let lamp_access0 = eval('{{ vlc.nvl.lamp_access }}'.toLocaleLowerCase())
+	let lamp_access1 = eval('{{ vlc.ovl.lamp_access }}'.toLocaleLowerCase())
 
-		fetch('http://localhost:5000/lamp', {
-			method: requestMethod
-		})
+	if (lamp_access0) {
+		button0.innerHTML = 'Active'
+		button0.classList.remove('btn-secondary')
+		button0.classList.add('btn-success')
+	} else {
+		button0.innerHTML = 'Inactive'
+		button0.classList.remove('btn-success')
+		button0.classList.add('btn-secondary')
+
+	}
+	if (lamp_access1) {
+		button1.innerHTML = 'Active'
+		button1.classList.remove('btn-secondary')
+		button1.classList.add('btn-success')
+	} else {
+		button1.innerHTML = 'Inactive'
+		button1.classList.remove('btn-success')
+		button1.classList.add('btn-secondary')
 	}
 
-	function setButton() {
-		let button = document.getElementById('override')
-		let lamp_access = eval('{{ vlc.nvl.lamp_access }}'.toLocaleLowerCase())
-		console.log(lamp_access);
-		if (lamp_access) {
-			button.classList.remove('btn-danger')
-			button.classList.add('btn-secondary')
-		} else {
-			button.classList.remove('btn-secondary')
-			button.classList.add('btn-danger')
-		}
-		return lamp_access;
+
+	function set_active(id) {
+		fetch(`http://localhost:5000/lamp/${id}`);
+		setTimeout(() => location.reload(), 1000)
 	}
+
 </script>
 
 {% endblock content %}
