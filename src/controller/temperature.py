@@ -57,6 +57,9 @@ class ColorTemperature:
 	@helpers.thread
 	def change(self, target_value: int, duration: int, start_value: int=None):
 		log.info(f'changing color temp to {target_value}, with duration of {duration}')
+
+		self.wait_for_stop()
+
 		self.running = True
 		asyncio.run(bulb.update())
 
@@ -111,3 +114,10 @@ class ColorTemperature:
 	@staticmethod
 	def round_to_nearest_100(x, base=100):
 		return int(base * round(float(x)/base))
+
+	def wait_for_stop(self):
+		if self.running:
+			self.should_stop = True
+
+		while self.running:
+			time.sleep(0.1)

@@ -54,6 +54,9 @@ class Brightness:
 	@helpers.thread
 	def change(self, target_value: int, duration: int=0, start_value: int=None):
 		log.info(f'changing brightness to {target_value}, with duration of {duration}')
+
+		self.wait_for_stop()
+
 		self.running = True
 		asyncio.run(bulb.update())
 
@@ -114,3 +117,10 @@ class Brightness:
 		# log.debug(f'{step_size=}')
 		amount_of_steps = math.ceil(diff / step_size)
 		return amount_of_steps, step_size
+
+	def wait_for_stop(self):
+		if self.running:
+			self.should_stop = True
+
+		while self.running:
+			time.sleep(0.1)
