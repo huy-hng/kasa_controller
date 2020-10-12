@@ -6,6 +6,7 @@ import astral
 from astral import sun
 
 from src.controller import vlc
+from src.logger import log
 
 location = astral.LocationInfo(timezone='Europe/Berlin', latitude=49.878708, longitude=8.646927)
 
@@ -35,6 +36,7 @@ def compare_time(hour: int, minute: int):
 
 @run_at(0, 30)
 def late():
+  log.info('launching late profile')
   vlc.nvl.brightness.change(1, 1800, abort_new=True)
 
 
@@ -53,4 +55,5 @@ def sunset():
   )
 
 	if compare_time(start.hour, start.minute):
+    log.info('running sunset profile')
 		vlc.nvl.color_temp.change(0, duration, abort_new=True)

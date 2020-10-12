@@ -1,9 +1,11 @@
 import asyncio
 import time
 from datetime import timedelta
+
 from timeloop import Timeloop
 
 from .controller import bulb, vlc, profiles
+from .logger import log
 
 tl = Timeloop()
 
@@ -23,5 +25,8 @@ def check_values():
 
 @tl.job(interval=timedelta(seconds=20))
 def check_time():
+	now = time.localtime()
+	log.debug(f'checking time: {now.tm_hour}:{now.tm_min}')
+	
 	profiles.sunset()
 	profiles.late()
