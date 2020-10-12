@@ -27,6 +27,6 @@ def check_values():
 def check_time():
 	now = time.localtime()
 	log.debug(f'checking time: {now.tm_hour}:{now.tm_min}')
-	
+
 	profiles.sunset()
 	profiles.late()
