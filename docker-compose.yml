@@ -7,7 +7,8 @@ services:
     ports:
       - 5000:5000
     volumes: 
-      - /root/repositories/kasa_controller/logs:/usr/src/app/logs
+      - /root/repositories/kasa_controller/logs:/usr/src/app/logs 
+      # TODO: when the folder structure or folder names get changed
     restart: unless-stopped
 
   socat:
