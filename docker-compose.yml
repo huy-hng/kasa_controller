@@ -6,6 +6,8 @@ services:
     build: .
     ports:
       - 5000:5000
+    volumes: 
+      - /root/repositories/kasa_controller/logs:/usr/src/app/logs
     restart: unless-stopped
 
   socat:
