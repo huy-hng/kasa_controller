@@ -48,12 +48,15 @@ def sunset():
 		tzinfo=location.timezone
 	)[0]
 
-	duration = sun.dusk(
+	end = sun.dusk(
 		location.observer,
 		date=datetime.datetime.now(),
 		tzinfo=location.timezone
 	)
 
+	duration = end - start
+
 	if compare_time(start.hour, start.minute):
 		log.info('running sunset profile')
-		vlc.nvl.color_temp.change(0, duration, abort_new=True)
+		vlc.nvl.color_temp.change(0, duration.seconds, abort_new=True)
+		
