@@ -12,18 +12,38 @@ tl = Timeloop()
 def check_values():
 	asyncio.run(bulb.update())
 
-	# TODO: if manual change, switch to override vl
+	if vlc.active_vlamp.brightness.actual != bulb.brightness:
+		# if brightness changed
+		log.debug(f'brightness manually changed from {vlc.active_vlamp.brightness.actual} to {bulb.brightness}')
 
-	brightness = vlc.active_vlamp.brightness
-	if brightness.actual != bulb.brightness:
-		brightness.actual = bulb.brightness
+		override()
+		vlc.active_vlamp.brightness.actual = bulb.brightness
 
-	color_temp = vlc.active_vlamp.color_temp
-	if color_temp.kelvin != bulb.color_temp:
-		color_temp.kelvin = bulb.color_temp
+
+	if vlc.active_vlamp.color_temp.kelvin != bulb.color_temp:
+		# if temperature changed
+		log.debug(f'temperature manually changed from {vlc.active_vlamp.color_temp.kelvin} to {bulb.color_temp}')
+
+		override()
+		vlc.active_vlamp.color_temp.kelvin = bulb.color_temp
+
+
+	if vlc.active_vlamp.on != bulb.is_on:
+		# if lamp turned off/on
+		log.debug(f'lamp is on changed to {bulb.is_on}')
+		override()
+		vlc.active_vlamp.on = bulb.is_on
+
+
+
 
 @tl.job(interval=timedelta(seconds=20))
 def check_time():
 
 	profiles.sunset()
 	profiles.late()
+
+
+def override():
+	if vlc.active_vlamp.id == 0:
+		vlc.override()
