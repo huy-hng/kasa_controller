@@ -5,12 +5,15 @@ from timeloop import Timeloop
 
 from .controller import bulb, vlc, profiles
 from .logger import log
+# pylint: disable=logging-fstring-interpolation
+
 
 tl = Timeloop()
 
 @tl.job(interval=timedelta(seconds=1))
 def check_values():
 	asyncio.run(bulb.update())
+	log.debug('checking if values have changed.')
 
 	if vlc.active_vlamp.brightness.actual != bulb.brightness:
 		# if brightness changed
