@@ -8,7 +8,6 @@ class VLampController:
 	def __init__(self):
 		self.nvl = VLamp(0, 'Normal VLamp')
 		self.ovl = VLamp(1, 'Override VLamp')
-		self.vlamps = (self.nvl, self.ovl)
 
 		self.disengage()
 
@@ -32,9 +31,9 @@ class VLampController:
 		# currently it stops when a new command comes in, which leads to 
 		# nvl having the wrong values
 		# (after disengage comes ovl loosing lamp access, then nvl getting current actual lamp values)
+		self.ovl.on = self.nvl.on
 		self.ovl.brightness.change(self.nvl.brightness.perceived, duration)
 		self.ovl.color_temp.change(self.nvl.color_temp.percent, duration)
-		self.ovl.on = self.nvl.on
 
 		time.sleep(0.5)
 

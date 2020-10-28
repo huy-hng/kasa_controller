@@ -10,7 +10,7 @@ from .logger import log
 
 tl = Timeloop()
 
-@tl.job(interval=timedelta(seconds=1))
+@tl.job(interval=timedelta(seconds=2))
 def check_values():
 	asyncio.run(bulb.update())
 	log.debug('checking if values have changed.')
