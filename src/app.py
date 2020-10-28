@@ -4,9 +4,8 @@ import asyncio
 from flask import Flask, request, render_template
 
 from . import controller
-from .controller import vlc
-from .controller.brightness import Brightness
-from .controller.temperature import ColorTemperature
+from .controller import vlc, profiles
+from .logger import log
 
 # from .logger import log
 
@@ -36,11 +35,29 @@ def off():
 # @app.route('/lamp', methods=['GET', 'DELETE'])
 @app.route('/lamp/<lamp_id>')
 def lamp(lamp_id=None):
-  vlc.set_active(int(lamp_id))
+  lamp_id = int(lamp_id)
+  if lamp_id == 0:
+    vlc.disengage()
+  else:
+    vlc.override()
   return f'lamp changed to {lamp_id}'
 
+@app.route('/override')
+def override():
+  vlc.override()
+  return '0'
 
+@app.route('/disengage/')
+@app.route('/disengage/<duration>')
+def disengage(duration=1):
+  duration = int(duration)
+  log.debug(f'disengaging with the duration of {duration}')
+  vlc.disengage(duration)
+  return '0'
 
+########
+#region# brightness
+########
 def change_brightness(vl, method, target, duration, start_value):
   if method == 'GET':
     target = int(target) if target else None
@@ -61,7 +78,7 @@ def change_brightness(vl, method, target, duration, start_value):
 @app.route('/brightness/<target>/<duration>/<start_value>')
 def brightness(target=None, duration=0, start_value=None):
   if vlc.is_normal_mode():
-    vlc.set_active(1)
+    vlc.override()
   return change_brightness(vlc.ovl, request.method, target, duration, start_value)
 
   
@@ -72,8 +89,13 @@ def brightness(target=None, duration=0, start_value=None):
 def nvl_brightness(target=None, duration=0, start_value=None):
   return change_brightness(vlc.nvl, request.method, target, duration, start_value)
 
+###########
+#endregion# brightness
+########
 
-
+########
+#region# color_temp
+########
 def change_color_temp(vl, method, target, duration, start_value):
   if method == 'GET':
     target = int(target) if target else None
@@ -93,7 +115,7 @@ def change_color_temp(vl, method, target, duration, start_value):
 @app.route('/temp/<target>/<duration>/<start_value>')
 def color_temp(target=None, duration=0, start_value=None):
   if vlc.is_normal_mode():
-    vlc.set_active(1)
+    vlc.override()
   return change_color_temp(vlc.ovl, request.method, target, duration, start_value)
 
 
@@ -103,3 +125,14 @@ def color_temp(target=None, duration=0, start_value=None):
 @app.route('/nvl/temp/<target>/<duration>/<start_value>')
 def nvl_color_temp(target=None, duration=0, start_value=None):
   return change_color_temp(vlc.nvl, request.method, target, duration, start_value)
+
+###########
+#endregion# color_temp
+########
+
+@app.route('/profile/<p>')
+def profile(p):
+  if p == 'wake_up':
+    profiles.wake_up()
+
+  return 'done'

@@ -1,4 +1,5 @@
 import time
+import asyncio
 import datetime
 from functools import wraps
 
@@ -6,6 +7,7 @@ import astral
 from astral import sun
 
 from src.controller import vlc
+from . import helpers
 from src.logger import log
 
 location = astral.LocationInfo(timezone='Europe/Berlin', latitude=49.878708, longitude=8.646927)
@@ -60,3 +62,10 @@ def sunset():
 		log.info('running sunset profile')
 		vlc.nvl.color_temp.change(0, duration.seconds, abort_new=True)
 		
+
+@helpers.thread
+def wake_up():
+	log.warning('Running Wake Up profile.')
+	vlc.nvl.brightness.change(100, 10)
+	time.sleep(10)
+	vlc.nvl.color_temp.change(100, 10)
