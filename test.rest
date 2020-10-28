@@ -16,21 +16,7 @@ DELETE http://localhost:5000/temp
 GET http://localhost:5000/brightness/50
 
 ###
-POST http://localhost:5000/brightness
-content-type: application/json
-
-{
-    "target": 100,
-    "duration": 1
-}
-###
-POST http://localhost:5000/brightness
-content-type: application/json
-
-{
-    "target": 1,
-    "duration": 1
-}
+GET https://130.83.4.219:5443/nvl/brightness/100
 ###
 
 POST http://0.0.0.0:5000/temp
