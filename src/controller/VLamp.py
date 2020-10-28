@@ -13,6 +13,7 @@ class VLamp:
 		self.id = id
 		self.name = name
 		self.lamp_access = False
+		self._on = True
 
 
 		# TODO: refactor brightness and colortemperature to parent class
@@ -21,13 +22,32 @@ class VLamp:
 		self.color_temp = ColorTemperature(set_color_temp=self.set_color_temp)
 		self.color_temp.kelvin = bulb.color_temp
 
+	@property
+	def on(self):
+		return self._on
+
+	@on.setter
+	def on(self, state: bool):
+		self._on = state
+		if self.lamp_access:
+			if state:
+				asyncio.run(bulb.turn_on())
+				asyncio.run(bulb.update())
+			else:
+				asyncio.run(bulb.turn_off())
+				asyncio.run(bulb.update())
+				
+		# self.set_brightness()
+		# self.set_color_temp()
+
+
 	@helpers.run
 	async def set_brightness(self):
 		if self.lamp_access:
-			if not bulb.is_on:
-				log.debug('Lamp is off, turning on.')
-				await bulb.turn_on()
-				await bulb.update()
+			# if not bulb.is_on:
+			# 	log.debug('Lamp is off, turning on.')
+			# 	await bulb.turn_on()
+			# 	await bulb.update()
 
 			turn_off = False
 			if self.brightness.perceived == 0:
@@ -48,9 +68,9 @@ class VLamp:
 	@helpers.run
 	async def set_color_temp(self):
 		if self.lamp_access:
-			if not bulb.is_on:
-				await bulb.turn_on()
-				await bulb.update()
+			# if not bulb.is_on:
+			# 	await bulb.turn_on()
+			# 	await bulb.update()
 
 			log.info(f'Changing color temperature to {self.color_temp.kelvin}.')
 			await bulb.set_color_temp(self.color_temp.kelvin)
