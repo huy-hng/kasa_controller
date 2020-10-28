@@ -115,17 +115,17 @@
 	}
 
 	function override() {
-		// fetch('https://130.83.4.219:5443/override');
-		fetch('http://localhost:5000/override');
+		fetch('https://130.83.4.219:5443/override');
+		// fetch('http://localhost:5000/override');
 		setTimeout(() => location.reload(), 1000)
 	}
 
 	function disengage() {
-		// fetch('https://130.83.4.219:5443/override');
 		let duration = document.getElementById('change_duration').value
 		duration = duration == '' ? '1' : duration
 
-		fetch(`http://localhost:5000/disengage/${duration}`);
+		fetch(`https://130.83.4.219:5443/disengage/${duration}`);
+		// fetch(`http://localhost:5000/disengage/${duration}`);
 		setTimeout(() => location.reload(), 1000)
 	}
 
