@@ -136,3 +136,8 @@ def profile(p):
     profiles.wake_up()
 
   return 'done'
+
+@app.route('/when_sunset')
+def sunset():
+  start, duration = profiles.get_sunset()
+  return f'start={start.hour}:{start.minute} duration={duration.seconds/60}'

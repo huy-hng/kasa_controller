@@ -41,8 +41,7 @@ def late():
 	log.info('launching late profile')
 	vlc.nvl.brightness.change(1, 1800, abort_new=True)
 
-
-def sunset():
+def get_sunset():
 	start = sun.golden_hour(
 		location.observer,
 		date=datetime.datetime.now(),
@@ -57,6 +56,11 @@ def sunset():
 	)
 
 	duration = end - start
+
+	return start, duration
+
+def sunset():
+	start, duration = get_sunset()
 
 	if compare_time(start.hour, start.minute):
 		log.info('running sunset profile')
