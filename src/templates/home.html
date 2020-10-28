@@ -23,9 +23,20 @@
 	<div class="card-body">
 		<h3>{{vlc.nvl.name}}</h3>
 
+		Is On: {{vlc.nvl.on}}
 		<br>
-		<button id="active{{vlc.nvl.id}}" type="button" class="btn btn-success"
-			onclick="set_active('{{vlc.nvl.id}}')">Active</button>
+		<hr>
+		<div class="d-flex">
+			<button id="active{{vlc.nvl.id}}" type="button" class="btn btn-success" onclick="disengage()">Active</button>
+
+			<div class="input-group">
+				<!-- <div class="input-group-prepend">
+					<button id="active{{vlc.nvl.id}}" type="button" class="btn btn-success" onclick="disengage()">Active</button>
+				</div> -->
+				<input id="change_duration" type="number" class="form-control" aria-label="Small"
+					aria-describedby="inputGroup-sizing-sm">
+			</div>
+		</div>
 		<hr>
 
 		<h4>Brightness</h4>
@@ -37,6 +48,7 @@
 
 		<hr>
 
+		<h4>Temperature</h4>
 		Percent: {{ vlc.nvl.color_temp.percent }}%
 		<br>
 		Kelvin: {{ vlc.nvl.color_temp.kelvin }}
@@ -52,9 +64,10 @@
 	<div class="card-body">
 		<h3>{{vlc.ovl.name}}</h3>
 
+		Is On: {{vlc.ovl.on}}
 		<br>
-		<button id="active{{vlc.ovl.id}}" type="button" class="btn btn-success"
-			onclick="set_active('{{vlc.ovl.id}}')">Active</button>
+		<hr>
+		<button id="active{{vlc.ovl.id}}" type="button" class="btn btn-success" onclick="override()">Active</button>
 		<hr>
 
 		<h4>Brightness</h4>
@@ -66,6 +79,7 @@
 
 		<hr>
 
+		<h4>Temperature</h4>
 		Percent: {{ vlc.ovl.color_temp.percent }}%
 		<br>
 		Kelvin: {{ vlc.ovl.color_temp.kelvin }}
@@ -86,25 +100,32 @@
 		button0.innerHTML = 'Active'
 		button0.classList.remove('btn-secondary')
 		button0.classList.add('btn-success')
+
+		button1.innerHTML = 'Inactive'
+		button1.classList.remove('btn-success')
+		button1.classList.add('btn-secondary')
 	} else {
 		button0.innerHTML = 'Inactive'
 		button0.classList.remove('btn-success')
 		button0.classList.add('btn-secondary')
 
-	}
-	if (lamp_access1) {
 		button1.innerHTML = 'Active'
 		button1.classList.remove('btn-secondary')
 		button1.classList.add('btn-success')
-	} else {
-		button1.innerHTML = 'Inactive'
-		button1.classList.remove('btn-success')
-		button1.classList.add('btn-secondary')
 	}
 
+	function override() {
+		// fetch('https://130.83.4.219:5443/override');
+		fetch('http://localhost:5000/override');
+		setTimeout(() => location.reload(), 1000)
+	}
 
-	function set_active(id) {
-		fetch(`https://130.83.4.219:5443/lamp/${id}`);
+	function disengage() {
+		// fetch('https://130.83.4.219:5443/override');
+		let duration = document.getElementById('change_duration').value
+		duration = duration == '' ? '1' : duration
+
+		fetch(`http://localhost:5000/disengage/${duration}`);
 		setTimeout(() => location.reload(), 1000)
 	}
 
