@@ -69,6 +69,6 @@ def sunset():
 @helpers.thread
 def wake_up():
 	log.warning('Running Wake Up profile.')
-	vlc.nvl.brightness.change(100, 10)
-	time.sleep(10)
-	vlc.nvl.color_temp.change(100, 10)
+	vlc.nvl.brightness.change(100, 1800)
+	time.sleep(1800)
+	vlc.nvl.color_temp.change(100, 1800)
