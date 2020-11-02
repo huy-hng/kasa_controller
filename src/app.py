@@ -1,4 +1,5 @@
 import time
+import os
 import asyncio
 
 from flask import Flask, request, render_template
@@ -141,3 +142,16 @@ def profile(p):
 def sunset():
   start, duration = profiles.get_sunset()
   return f'start={start.hour}:{start.minute} duration={duration.seconds/60}'
+
+
+@app.route('/debug')
+def debug():
+  files = os.listdir('./logs/debug')
+  with open(f'./logs/debug/{files[-1]}') as f:
+    return f'<pre>{f.read()}</pre>'
+
+@app.route('/info')
+def info():
+  files = os.listdir('./logs/info')
+  with open(f'./logs/info/{files[-1]}') as f:
+    return f'<pre>{f.read()}</pre>'
