@@ -1,15 +1,12 @@
 import asyncio
 import time
-# from datetime import timedelta
 from functools import wraps
-
-from timeloop import Timeloop
 
 from .controller import bulb, vlc, profiles
 from .controller.helpers import executor
 from .logger import log
-# pylint: disable=logging-fstring-interpolation
 
+# pylint: disable=logging-fstring-interpolation
 
 def looper(sleep: int):
 	def decorator(function):
@@ -32,8 +29,9 @@ def override():
 		vlc.override()
 
 
-@looper(2)
+@looper(1)
 def check_values():
+	log.debug(f'updating bulb')
 	asyncio.run(bulb.update())
 	log.debug(f'checking if values have changed.')
 
