@@ -7,10 +7,14 @@ from src.logger import log
 
 class VLampController:
 	def __init__(self):
+		print('initializing VLampController')
+		log.info('initializing VLampController')
+
 		self.nvl = VLamp(0, 'Normal VLamp')
 		self.ovl = VLamp(1, 'Override VLamp')
 
-		self.disengage()
+		self.active_vlamp = self.nvl
+		self.nvl.lamp_access = True
 
 	def override(self):
 		log.info('Overriding nvl')
@@ -41,7 +45,7 @@ class VLampController:
 		self.ovl.lamp_access = False
 		self.active_vlamp = self.nvl
 
-		log.debug(f'running done')
+		log.debug('running done')
 
 		
 	def is_normal_mode(self):

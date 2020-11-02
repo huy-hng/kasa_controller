@@ -3,8 +3,8 @@ import asyncio
 
 from flask import Flask, request, render_template
 
-from . import controller
-from .controller import vlc, profiles
+# from . import controller
+from .controller import vlc, profiles, bulb
 from .logger import log
 
 # from .logger import log
@@ -20,14 +20,14 @@ def home():
 
 @app.route('/on')
 def on():
-  asyncio.run(controller.bulb.update())
-  asyncio.run(controller.bulb.turn_on())
+  asyncio.run(bulb.update())
+  asyncio.run(bulb.turn_on())
   return 'on'
 
 @app.route('/off')
 def off():
-  asyncio.run(controller.bulb.update())
-  asyncio.run(controller.bulb.turn_off())
+  asyncio.run(bulb.update())
+  asyncio.run(bulb.turn_off())
   return 'off'
 
 

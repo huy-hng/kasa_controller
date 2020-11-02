@@ -8,7 +8,7 @@ if not os.path.isdir('./logs'):
 log = logging.getLogger('root')
 log.setLevel(logging.DEBUG)
 
-file_formatter = logging.Formatter(
+formatter = logging.Formatter(
 	'%(levelname)7s|%(asctime)s|%(funcName)20s()|line %(lineno)3s|%(message)3s',
 	datefmt='%Y-%m-%d %H:%M:%S'
 )
@@ -22,30 +22,13 @@ def file_handler(folder, log_level):
 							+ datetime.datetime.now().strftime("%Y-%m-%d") 
 							+ '.log')
 	handler.setLevel(log_level)
-	handler.setFormatter(file_formatter)
+	handler.setFormatter(formatter)
 	log.addHandler(handler)
 
-file_handler('verbose', logging.DEBUG)
+file_handler('debug', logging.DEBUG)
 file_handler('info', logging.INFO)
 
 consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(file_formatter)
-consoleHandler.setLevel(logging.INFO)
+consoleHandler.setFormatter(formatter)
+consoleHandler.setLevel(logging.DEBUG)
 log.addHandler(consoleHandler)
-
-
-if __name__ == '__main__':
-	def debug():
-		log.debug('tst')
-	def info():
-		log.info('tst')
-	def warn():
-		log.warning('tst')
-	def error():
-		log.error('tst')
-		
-	debug()
-	info()
-	warn()
-	error()
-	
