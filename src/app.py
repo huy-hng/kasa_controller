@@ -8,8 +8,6 @@ from flask import Flask, request, render_template
 from .controller import vlc, profiles, bulb
 from .logger import log
 
-# from .logger import log
-
 app = Flask(__name__)
 
 @app.route('/')
@@ -135,7 +133,6 @@ def nvl_color_temp(target=None, duration=0, start_value=None):
 def profile(p):
   if p == 'wake_up':
     profiles.wake_up()
-
   return 'done'
 
 @app.route('/when_sunset')
