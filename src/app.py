@@ -127,10 +127,14 @@ def nvl_color_temp(target=None, duration=0, start_value=None):
 ########
 
 @app.route('/profile/<p>')
-def profile(p):
+@app.route('/profile/<p>/<vlamp>')
+def profile(p, vlamp=None):
+  if vlamp == 'ovl':
+    vlc.override()
+
   fn = profiles.profiles.get(p)
   if fn is not None:
-    fn()
+    fn() if vlamp is None else fn(vlc.ovl)
     return f'Executed {p}'
   return f'Profile "{p}" not found.'
 
