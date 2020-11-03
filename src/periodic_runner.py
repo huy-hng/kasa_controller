@@ -33,8 +33,10 @@ def override():
 @looper(1)
 def check_values():
 	asyncio.run(bulb.update())
+	log.debug('Checking values')
 	
 	if vlc.active_vlamp.is_running:
+		log.debug('vlamp is running, skipping check')
 		return
 
 	if vlc.active_vlamp.brightness.actual != bulb.brightness:
