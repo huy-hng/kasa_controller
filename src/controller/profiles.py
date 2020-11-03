@@ -25,20 +25,10 @@ def run_at(hour: int, minute: int):
 		return wrapper
 	return actual_decorator
 
-
-def compare_time(hour: int, minute: int):
-	now = time.localtime()
-	curr = datetime.time(now.tm_hour, now.tm_min)
-	target = datetime.time(hour, minute)
-	if curr == target:
-		return True
-	return False
-
-
-@run_at(0, 30)
-def late():
+def late(vlamp=vlc.nvl):
 	log.info('launching late profile')
-	vlc.nvl.brightness.change(1, 1800, abort_new=True)
+	vlamp.brightness.change(1, 1800, abort_new=True)
+
 
 def get_sunset():
 	start = sun.golden_hour(
@@ -58,17 +48,23 @@ def get_sunset():
 
 	return start, duration
 
-def sunset():
-	start, duration = get_sunset()
+def sunset(vlamp=vlc.nvl):
+	_, duration = get_sunset()
 
-	if compare_time(start.hour, start.minute):
-		log.info('running sunset profile')
-		vlc.nvl.color_temp.change(0, duration.seconds, abort_new=True)
+	log.info('running sunset profile')
+	vlamp.color_temp.change(0, duration.seconds, abort_new=True)
 		
 
 @helpers.thread
-def wake_up():
+def wake_up(vlamp=vlc.nvl):
 	log.warning('Running Wake Up profile.')
-	vlc.nvl.brightness.change(100, 1800)
+	vlamp.brightness.change(100, 1800)
 	time.sleep(1800)
-	vlc.nvl.color_temp.change(100, 1800)
+	vlamp.color_temp.change(100, 1800)
+
+
+profiles = {
+	'wakeup': wake_up,
+	'sunset': sunset,
+	'late': late
+}

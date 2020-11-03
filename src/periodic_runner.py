@@ -1,5 +1,6 @@
 import asyncio
 import time
+import datetime
 from functools import wraps
 
 from .controller import bulb, vlc, profiles
@@ -59,7 +60,22 @@ def check_values():
 		override()
 		vlc.active_vlamp.on = bulb.is_on
 
+
+def compare_time(hour: int, minute: int):
+	now = time.localtime()
+	curr = datetime.time(now.tm_hour, now.tm_min)
+	target = datetime.time(hour, minute)
+	if curr == target:
+		return True
+	return False
+
+
+
 @looper(20)
 def check_time():
-	profiles.sunset()
-	profiles.late()
+	sunset_start, _ = profiles.get_sunset()
+	if compare_time(sunset_start.hour, sunset_start.minute):
+		profiles.sunset()
+		
+	if compare_time(0, 30):
+		profiles.late()

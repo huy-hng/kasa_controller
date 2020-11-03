@@ -4,7 +4,6 @@ import asyncio
 
 from flask import Flask, request, render_template
 
-# from . import controller
 from .controller import vlc, profiles, bulb
 from .logger import log
 
@@ -30,8 +29,6 @@ def off():
   return 'off'
 
 
-# @app.route('/lamp/override', methods=['GET'])
-# @app.route('/lamp', methods=['GET', 'DELETE'])
 @app.route('/lamp/<lamp_id>')
 def lamp(lamp_id=None):
   lamp_id = int(lamp_id)
@@ -131,16 +128,22 @@ def nvl_color_temp(target=None, duration=0, start_value=None):
 
 @app.route('/profile/<p>')
 def profile(p):
-  if p == 'wake_up':
-    profiles.wake_up()
-  return 'done'
+  fn = profiles.profiles.get(p)
+  if fn is not None:
+    fn()
+    return f'Executed {p}'
+  return f'Profile "{p}" not found.'
 
 @app.route('/when_sunset')
-def sunset():
+def when_sunset():
   start, duration = profiles.get_sunset()
-  return f'start={start.hour}:{start.minute} duration={duration.seconds/60}'
+  return f'start={start.hour}:{start.minute} duration={round(duration.seconds/60, 2)}'
 
 
+
+#############
+#region logs#
+#############
 @app.route('/debug')
 def debug():
   files = os.listdir('./logs/debug')
@@ -152,3 +155,7 @@ def info():
   files = os.listdir('./logs/info')
   with open(f'./logs/info/{files[-1]}') as f:
     return f'<pre>{f.read()}</pre>'
+
+##########
+#endregion
+#############
