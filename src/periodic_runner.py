@@ -31,9 +31,10 @@ def override():
 
 @looper(1)
 def check_values():
-	log.debug(f'updating bulb')
 	asyncio.run(bulb.update())
-	log.debug(f'checking if values have changed.')
+	
+	if vlc.active_vlamp.is_running:
+		return
 
 	if vlc.active_vlamp.brightness.actual != bulb.brightness:
 		# if brightness changed
@@ -45,6 +46,7 @@ def check_values():
 
 	if vlc.active_vlamp.color_temp.kelvin != bulb.color_temp:
 		# if temperature changed
+		log.debug(f'{vlc.active_vlamp.name}')
 		log.debug(f'temperature manually changed from {vlc.active_vlamp.color_temp.kelvin} to {bulb.color_temp}')
 
 		override()

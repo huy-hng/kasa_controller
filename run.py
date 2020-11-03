@@ -10,4 +10,4 @@ time.tzset()
 periodic_runner.check_values()
 periodic_runner.check_time()
 
-app.run(debug=True, host='0.0.0.0')
+app.run(host='0.0.0.0')
