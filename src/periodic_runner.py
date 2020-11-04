@@ -27,7 +27,7 @@ def looper(sleep: int):
 
 def override():
 	if vlc.active_vlamp.id == 0:
-		vlc.override()
+		vlc.override(0, False)
 
 
 @looper(1)

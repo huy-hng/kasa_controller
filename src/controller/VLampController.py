@@ -1,5 +1,6 @@
 import time
 
+from src.controller import helpers
 from src.controller.VLamp import VLamp
 from src.logger import log
 
@@ -16,17 +17,25 @@ class VLampController:
 		self.active_vlamp = self.nvl
 		self.nvl.lamp_access = True
 
-	def override(self):
+	def override(self, duration=0, new=True):
 		log.info('Overriding nvl')
 
-		self.ovl = VLamp(1, 'Override VLamp')
-		self.ovl.brightness.perceived = self.nvl.brightness.perceived
-		self.ovl.color_temp.kelvin = self.nvl.color_temp.kelvin
+		if new:
+			self.ovl = VLamp(1, 'Override VLamp')
+			self.ovl.brightness.perceived = self.nvl.brightness.perceived
+			self.ovl.color_temp.kelvin = self.nvl.color_temp.kelvin
 
 		self.nvl.lamp_access = False
 		self.ovl.lamp_access = True
 		self.active_vlamp = self.ovl
 
+		if duration > 0:
+			self.disengage_in(duration)
+
+	@helpers.thread
+	def disengage_in(self, duration):
+		time.sleep(duration*60)
+		self.disengage()
 
 	def disengage(self, duration=1):
 		""" disengages this vlamp and engages the vlamp given as param """

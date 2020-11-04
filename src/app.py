@@ -6,6 +6,7 @@ from flask import Flask, request, render_template
 
 from .controller import vlc, profiles, bulb
 from .logger import log
+# pylint: disable=logging-fstring-interpolation
 
 app = Flask(__name__)
 
@@ -39,15 +40,16 @@ def lamp(lamp_id=None):
   return f'lamp changed to {lamp_id}'
 
 @app.route('/override')
-def override():
-  vlc.override()
+@app.route('/override/<duration>')
+def override(duration=0):
+  vlc.override(int(duration))
   return '0'
 
 @app.route('/disengage/')
 @app.route('/disengage/<duration>')
 def disengage(duration=1):
   duration = int(duration)
-  log.debug(f'disengaging with the duration of {duration}')
+  log.info(f'disengaging with the duration of {duration}')
   vlc.disengage(duration)
   return '0'
 
@@ -73,8 +75,7 @@ def change_brightness(vl, method, target, duration, start_value):
 @app.route('/brightness/<target>/<duration>')
 @app.route('/brightness/<target>/<duration>/<start_value>')
 def brightness(target=None, duration=0, start_value=None):
-  if vlc.is_normal_mode():
-    vlc.override()
+  vlc.override(0, False)
   return change_brightness(vlc.ovl, request.method, target, duration, start_value)
 
   
@@ -110,8 +111,7 @@ def change_color_temp(vl, method, target, duration, start_value):
 @app.route('/temp/<target>/<duration>')
 @app.route('/temp/<target>/<duration>/<start_value>')
 def color_temp(target=None, duration=0, start_value=None):
-  if vlc.is_normal_mode():
-    vlc.override()
+  vlc.override(0, False)
   return change_color_temp(vlc.ovl, request.method, target, duration, start_value)
 
 
