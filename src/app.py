@@ -152,7 +152,7 @@ def when_sunset():
 def debug():
   files = os.listdir('./logs/debug')
   with open(f'./logs/debug/{files[-1]}') as f:
-    return f'<pre>{f.read()}</pre>'
+    return f'./logs/debug/{files[-1]} \n\n<pre>{f.read()}</pre>'
 
 @app.route('/info')
 def info():
