@@ -5,7 +5,7 @@ from functools import wraps
 import astral
 from astral import sun
 
-from src.controller import vlc
+from src.controller import vlc, bulb
 from . import helpers
 from src.logger import log
 
@@ -58,6 +58,7 @@ def sunset(vlamp=vlc.nvl):
 @helpers.thread
 def wake_up(vlamp=vlc.nvl):
 	log.warning('Running Wake Up profile.')
+	bulb.turn_on()
 	vlamp.brightness.change(100, 1800)
 	time.sleep(1800)
 	vlamp.color_temp.change(100, 1800)
