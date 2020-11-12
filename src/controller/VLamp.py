@@ -32,6 +32,8 @@ class VLamp:
 		if self.lamp_access:
 			if state:
 				asyncio.run(bulb.turn_on())
+				asyncio.run(bulb.set_brightness(self.brightness.actual))
+				asyncio.run(bulb.set_color_temp(self.color_temp.kelvin))
 				asyncio.run(bulb.update())
 			else:
 				asyncio.run(bulb.turn_off())

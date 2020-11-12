@@ -5,6 +5,8 @@ import requests
 endpoint = 'http://localhost:5000'
 
 
-# requests.get(endpoint+'/nvl/brightness/100')
-# requests.get(endpoint+'/nvl/temp/0')
-requests.get(endpoint+'/override/2')
+# requests.get(endpoint+'/profile/wakeup')
+requests.get(endpoint+'/on')
+# requests.get(endpoint+'/disengage')
+requests.get(endpoint+'/nvl/brightness/100')
+requests.get(endpoint+'/nvl/temp/100') 
