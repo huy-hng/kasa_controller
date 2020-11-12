@@ -19,14 +19,12 @@ def home():
 
 @app.route('/on')
 def on():
-  asyncio.run(bulb.update())
-  asyncio.run(bulb.turn_on())
+  vlc.active_vlamp.on = True
   return 'on'
 
 @app.route('/off')
 def off():
-  asyncio.run(bulb.update())
-  asyncio.run(bulb.turn_off())
+  vlc.active_vlamp.on = False
   return 'off'
 
 
