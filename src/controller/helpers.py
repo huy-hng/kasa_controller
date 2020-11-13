@@ -3,13 +3,21 @@ from functools import wraps
 from concurrent.futures import ThreadPoolExecutor
 
 from src.controller import SINGLE_CHANGE_DUR
+from src.logger import log
 
 executor = ThreadPoolExecutor()
+
+def check_for_error(future):
+	try:
+		future.result()
+	except Exception as e:
+		log.exception(e)
 
 def thread(fn):
 	@wraps(fn)
 	def wrapper(*args, **kwargs):
-		executor.submit(lambda: asyncio.run(fn(*args, **kwargs)))
+		future = executor.submit(lambda: asyncio.run(fn(*args, **kwargs)))
+		executor.submit(check_for_error, future)
 	return wrapper
 
 def run(fn):
