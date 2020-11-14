@@ -7,17 +7,18 @@ from src.logger import log
 
 executor = ThreadPoolExecutor()
 
-def check_for_error(future):
+def check_for_error(future, name):
 	try:
 		future.result()
 	except Exception as e:
+		log.error(name)
 		log.exception(e)
 
 def thread(fn):
 	@wraps(fn)
 	def wrapper(*args, **kwargs):
-		future = executor.submit(lambda: asyncio.run(fn(*args, **kwargs)))
-		executor.submit(check_for_error, future)
+		future = executor.submit(lambda: fn(*args, **kwargs))
+		executor.submit(check_for_error, future, fn.__name__)
 	return wrapper
 
 def run(fn):

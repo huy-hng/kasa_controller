@@ -13,7 +13,7 @@ DELETE http://localhost:5000/temp
 ###
 
 ###
-GET http://localhost:5000/brightness/50
+GET http://localhost:5000/profile/wakeup
 
 ###
 GET https://130.83.4.219:5443/nvl/brightness/100
