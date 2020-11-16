@@ -3,7 +3,7 @@ import time
 import datetime
 from functools import wraps
 
-from .controller import bulb, vlc, profiles
+from .controller import bulb, vlc, profiles, helpers
 from .controller.helpers import executor
 from .logger import log
 
@@ -20,8 +20,8 @@ def looper(sleep: int):
 		@wraps(function)
 		def wrapper():
 			log.debug('running executor')
-			executor.submit(runner)
-			# runner()
+			future = executor.submit(runner)
+			executor.submit(helpers.check_for_error, future, function.__name__)
 		return wrapper
 	return decorator
 
