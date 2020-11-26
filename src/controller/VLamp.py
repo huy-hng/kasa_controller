@@ -57,7 +57,12 @@ class VLamp:
 				turn_off = True
 
 			log.debug(f'Changing brightness to {self.brightness.perceived}.')
-			await bulb.set_brightness(self.brightness.actual)
+			try:
+				await bulb.set_brightness(self.brightness.actual)
+			except Exception as e:
+				log.exception(e)
+				self.brightness.should_stop = True
+
 
 			if turn_off:
 				log.info('Brightness was set to 0, turning lamp off.')
@@ -65,7 +70,6 @@ class VLamp:
 				await bulb.turn_off()
 		else:
 			log.debug(f'{self.name} has no lamp access.')
-
 
 	@helpers.run
 	async def set_color_temp(self):
@@ -75,7 +79,11 @@ class VLamp:
 			# 	await bulb.update()
 
 			log.info(f'Changing color temperature to {self.color_temp.kelvin}.')
-			await bulb.set_color_temp(self.color_temp.kelvin)
+			try:
+				await bulb.set_color_temp(self.color_temp.kelvin)
+			except Exception as e:
+				log.exception(e)
+				self.brightness.should_stop = True
 		else:
 			log.debug(f'{self.name} has no lamp access.')
 		
