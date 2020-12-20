@@ -57,11 +57,11 @@ def sunset(vlamp=vlc.nvl):
 
 @helpers.thread
 @helpers.run
-async def wake_up(vlamp=vlc.nvl):
+async def wake_up(vlamp=vlc.nvl, duration=600):
 	log.warning('Running Wake Up profile.')
 	await bulb.turn_on()
 	await bulb.update()
-	duration = 600
+	
 	vlamp.brightness.change(100, duration/2)
 	time.sleep(duration/2)
 	vlamp.color_temp.change(100, duration/2)

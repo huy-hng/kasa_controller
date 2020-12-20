@@ -126,6 +126,7 @@ def nvl_color_temp(target=None, duration=0, start_value=None):
 
 @app.route('/profile/<p>')
 @app.route('/profile/<p>/<vlamp>')
+@app.route('/profile/<p>/<vlamp>/<args>')
 def profile(p, vlamp=None):
   if vlamp == 'ovl':
     vlc.override()
