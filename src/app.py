@@ -1,10 +1,8 @@
-import time
 import os
-import asyncio
 
 from flask import Flask, request, render_template
 
-from .controller import vlc, profiles, bulb
+from .controller import vlc, profiles
 from .logger import log
 # pylint: disable=logging-fstring-interpolation
 
