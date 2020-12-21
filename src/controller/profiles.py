@@ -25,7 +25,7 @@ def run_at(hour: int, minute: int):
 		return wrapper
 	return actual_decorator
 
-def late(vlamp=vlc.nvl):
+def late(vlamp=vlc.nom):
 	log.info('launching late profile')
 	vlamp.brightness.change(1, 1800, abort_new=True)
 
@@ -48,7 +48,7 @@ def get_sunset():
 
 	return start, duration
 
-def sunset(vlamp=vlc.nvl):
+def sunset(vlamp=vlc.nom):
 	_, duration = get_sunset()
 
 	log.info('running sunset profile')
@@ -57,7 +57,7 @@ def sunset(vlamp=vlc.nvl):
 
 @helpers.thread
 @helpers.run
-async def wake_up(vlamp=vlc.nvl, duration=600):
+async def wake_up(vlamp=vlc.nom, duration=600):
 	log.warning('Running Wake Up profile.')
 	await bulb.turn_on()
 	await bulb.update()

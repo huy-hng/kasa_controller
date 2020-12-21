@@ -9,8 +9,8 @@ from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 class VLamp:
-	def __init__(self, id: int, name: str):
-		self.id = id
+	def __init__(self, id_: int, name: str):
+		self.id = id_
 		self.name = name
 		self.lamp_access = False
 		self._on = True

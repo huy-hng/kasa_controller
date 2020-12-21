@@ -1,37 +1,16 @@
 import asyncio
-import time
-import datetime
-from functools import wraps
 
-from .controller import bulb, vlc, profiles, helpers
-from .controller.helpers import executor
-from .logger import log
-
+from ..controller import bulb, vlc
+from ..logger import log
 # pylint: disable=logging-fstring-interpolation
-
-def looper(sleep: int):
-	def decorator(function):
-		def runner():
-			log.debug('running loop')
-			while True:
-				function()
-				time.sleep(sleep)
-
-		@wraps(function)
-		def wrapper():
-			log.debug('running executor')
-			future = executor.submit(runner)
-			executor.submit(helpers.check_for_error, future, function.__name__)
-		return wrapper
-	return decorator
 
 def override():
 	if vlc.active_vlamp.id == 0:
 		vlc.override(0, False)
 
 
-@looper(1)
-def check_values():
+
+def check_changes():
 	asyncio.run(bulb.update())
 	log.debug('Checking values')
 	
@@ -61,23 +40,3 @@ def check_values():
 		log.debug(f'lamp is on changed to {bulb.is_on}')
 		override()
 		vlc.active_vlamp.on = bulb.is_on
-
-
-def compare_time(hour: int, minute: int):
-	now = time.localtime()
-	curr = datetime.time(now.tm_hour, now.tm_min)
-	target = datetime.time(hour, minute)
-	if curr == target:
-		return True
-	return False
-
-
-
-@looper(20)
-def check_time():
-	sunset_start, _ = profiles.get_sunset()
-	if compare_time(sunset_start.hour, sunset_start.minute):
-		profiles.sunset()
-		
-	if compare_time(0, 30):
-		profiles.late()
