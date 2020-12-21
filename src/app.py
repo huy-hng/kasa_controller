@@ -1,7 +1,8 @@
 import os
 
-from flask import Flask, request, render_template
+from flask import Flask, request, render_template, jsonify
 
+from .periodic_runner.change_detection import check_changes
 from .controller import vlc, profiles
 from .logger import log
 # pylint: disable=logging-fstring-interpolation
@@ -14,6 +15,29 @@ def home():
   return render_template('home.html', vlc=vlc, environment=os.getenv('ENVIRONMENT')) # FIX: vulneralbility
 
 
+@app.route('/check_for_changes')
+def check_for_changes():
+  check_changes()
+
+
+@app.route('/set_active_lamp/<id_>')
+def set_active_lamp(id_):
+  try:
+    id_ = int(id_)
+  except Exception as e:
+    log.error(f"id has to be an int and not '{id_}'")
+    return jsonify(success=False), 400
+  
+  vlc.set_active_lamp(id_)
+  return jsonify(success=True)
+
+@app.route('/get/<value>')
+def get_value(value):
+  if value == 'brightness':
+    return str(vlc.active_vlamp.brightness.perceived)
+  elif value == 'color_temp':
+    return str(vlc.active_vlamp.color_temp.percent)
+
 
 @app.route('/on')
 def on():
@@ -25,29 +49,6 @@ def off():
   vlc.active_vlamp.on = False
   return 'off'
 
-
-@app.route('/lamp/<lamp_id>')
-def lamp(lamp_id=None):
-  lamp_id = int(lamp_id)
-  if lamp_id == 0:
-    vlc.disengage()
-  else:
-    vlc.override()
-  return f'lamp changed to {lamp_id}'
-
-@app.route('/override')
-@app.route('/override/<duration>')
-def override(duration=0):
-  vlc.override(int(duration))
-  return '0'
-
-@app.route('/disengage/')
-@app.route('/disengage/<duration>')
-def disengage(duration=1):
-  duration = int(duration)
-  log.info(f'disengaging with the duration of {duration}')
-  vlc.disengage(duration)
-  return '0'
 
 ########
 #region# brightness
@@ -66,13 +67,13 @@ def change_brightness(vl, method, target, duration, start_value):
 
 
 
-@app.route('/brightness', methods=['DELETE'])
-@app.route('/brightness/<target>')
-@app.route('/brightness/<target>/<duration>')
-@app.route('/brightness/<target>/<duration>/<start_value>')
-def brightness(target=None, duration=0, start_value=None):
+@app.route('/<vlamp_id>/brightness', methods=['DELETE'])
+@app.route('/<vlamp_id>/brightness/<target>')
+@app.route('/<vlamp_id>/brightness/<target>/<duration>')
+@app.route('/<vlamp_id>/brightness/<target>/<duration>/<start_value>')
+def brightness(vlamp_id, target=None, duration=0, start_value=None):
   vlc.override(0, False)
-  return change_brightness(vlc.ovl, request.method, target, duration, start_value)
+  return change_brightness(vlc.tom, request.method, target, duration, start_value)
 
   
 @app.route('/nvl/brightness', methods=['DELETE'])
@@ -80,7 +81,7 @@ def brightness(target=None, duration=0, start_value=None):
 @app.route('/nvl/brightness/<target>/<duration>')
 @app.route('/nvl/brightness/<target>/<duration>/<start_value>')
 def nvl_brightness(target=None, duration=0, start_value=None):
-  return change_brightness(vlc.nvl, request.method, target, duration, start_value)
+  return change_brightness(vlc.nom, request.method, target, duration, start_value)
 
 ###########
 #endregion# brightness
@@ -108,7 +109,7 @@ def change_color_temp(vl, method, target, duration, start_value):
 @app.route('/temp/<target>/<duration>/<start_value>')
 def color_temp(target=None, duration=0, start_value=None):
   vlc.override(0, False)
-  return change_color_temp(vlc.ovl, request.method, target, duration, start_value)
+  return change_color_temp(vlc.tom, request.method, target, duration, start_value)
 
 
 @app.route('/nvl/temp', methods=['DELETE'])
@@ -116,7 +117,7 @@ def color_temp(target=None, duration=0, start_value=None):
 @app.route('/nvl/temp/<target>/<duration>')
 @app.route('/nvl/temp/<target>/<duration>/<start_value>')
 def nvl_color_temp(target=None, duration=0, start_value=None):
-  return change_color_temp(vlc.nvl, request.method, target, duration, start_value)
+  return change_color_temp(vlc.nom, request.method, target, duration, start_value)
 
 ###########
 #endregion# color_temp
@@ -131,7 +132,7 @@ def profile(p, vlamp=None):
 
   fn = profiles.profiles.get(p)
   if fn is not None:
-    fn() if vlamp is None else fn(vlc.ovl)
+    fn() if vlamp is None else fn(vlc.tom)
     return f'Executed {p}'
   return f'Profile "{p}" not found.'
 
