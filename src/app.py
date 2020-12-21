@@ -11,7 +11,7 @@ app = Flask(__name__)
 @app.route('/')
 def home():
   # TODO: move to react
-  return render_template('home.html', vlc=vlc) # FIX: vulneralbility
+  return render_template('home.html', vlc=vlc, environment=os.getenv('ENVIRONMENT')) # FIX: vulneralbility
 
 
 

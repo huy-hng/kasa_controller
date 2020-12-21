@@ -9,6 +9,7 @@ Flask-RESTful = "*"
 python-kasa = "*"
 astral = "*"
 pylint = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

@@ -92,8 +92,8 @@
 <br>
 
 <script>
-	let debug = false
-	let endpoint = debug ? 'http://localhost:5000' : 'https://130.83.4.219:5443'
+	let environment = '{{ environment }}'
+	let endpoint = environment == 'dev' ? 'http://localhost:5000' : 'https://130.83.4.219:5443'
 	let button0 = document.getElementById('active0')
 	let button1 = document.getElementById('active1')
 
@@ -117,6 +117,7 @@
 		button1.classList.remove('btn-secondary')
 		button1.classList.add('btn-success')
 	}
+
 
 	function override() {
 		fetch(`${endpoint}/override`);

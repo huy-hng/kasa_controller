@@ -3,11 +3,12 @@ import time
 
 from src.app import app
 from src import periodic_runner
+import settings
 
 os.environ['TZ'] = 'Europe/Berlin'
 time.tzset()
 
-periodic_runner.check_values()
-periodic_runner.check_time()
+# periodic_runner.check_values()
+# periodic_runner.check_time()
 
 app.run(host='0.0.0.0')
