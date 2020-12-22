@@ -4,11 +4,6 @@ from ..controller import bulb, vlc
 from ..logger import log
 # pylint: disable=logging-fstring-interpolation
 
-def override():
-	if vlc.active_vlamp.id == 0:
-		vlc.override(0, False)
-
-
 
 def check_changes():
 	asyncio.run(bulb.update())
