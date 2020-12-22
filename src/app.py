@@ -20,8 +20,8 @@ def check_for_changes():
   check_changes()
 
 
-@app.route('/set_active_lamp/<id_>')
-def set_active_lamp(id_):
+@app.route('/set_active_vlamp/<id_>')
+def set_active_vlamp(id_=None):
   try:
     id_ = int(id_)
   except Exception as e:
@@ -31,110 +31,85 @@ def set_active_lamp(id_):
   vlc.set_active_lamp(id_)
   return jsonify(success=True)
 
-@app.route('/get/<value>')
-def get_value(value):
-  if value == 'brightness':
-    return str(vlc.active_vlamp.brightness.perceived)
-  elif value == 'color_temp':
-    return str(vlc.active_vlamp.color_temp.percent)
+
+@app.route('/<vlamp_id>/on')
+def on(vlamp_id):
+  vlamp = vlc.get_vlamp_by_id(vlamp_id)
+  vlamp.on = True
+  return f'Turning {vlamp.name} on'
+
+@app.route('/<vlamp_id>/off')
+def off(vlamp_id):
+  vlamp = vlc.get_vlamp_by_id(vlamp_id)
+  vlamp.on = False
+  return f'Turning {vlamp.name} off'
 
 
-@app.route('/on')
-def on():
-  vlc.active_vlamp.on = True
-  return 'on'
+@app.route('/<vlamp_id>/brightness', methods=['GET', 'DELETE'])
+@app.route('/<vlamp_id>/color_temp', methods=['GET', 'DELETE'])
+def handle_action(vlamp_id=0):
+  vlamp = vlc.get_vlamp_by_id(vlamp_id)
 
-@app.route('/off')
-def off():
-  vlc.active_vlamp.on = False
-  return 'off'
+  if vlamp.id != vlc.active_vlamp.id:
+    vlc.set_active_lamp(vlamp.id, 0)
 
+  action = request.path.split('/')[2]
+  if action == 'brightness':
+    vlamp_value = vlamp.brightness
+  else:
+    vlamp_value = vlamp.color_temp
 
-########
-#region# brightness
-########
-def change_brightness(vl, method, target, duration, start_value):
-  if method == 'GET':
+  log.debug(f'{vlamp.name}')
+  return handle_change_endpoint(vlamp_value, request)
+
+def handle_change_endpoint(vlamp_value, req):
+  if req.method == 'GET':
+    target = req.args.get('target')
+    duration = req.args.get('duration')
+    start = req.args.get('start')
+
+    if target is None:
+      return str(vlamp_value.value)
+    return set_value(vlamp_value, target, duration, start)
+
+  elif request.method == 'DELETE':
+    vlamp_value.should_stop = True
+    return 'Stopped brightness change.'
+
+def set_value(vlamp_value, target, duration, start):
+  log.debug(f'{target=} {duration=} {start=}')
+  try:
     target = int(target) if target else None
-    start_value = int(start_value) if start_value else None
+    duration = int(duration) if duration else 0
+    start = int(start) if start else None
+  except Exception as e:
+    log.error(f"Values need to convertable to an int and not '{target}', '{duration}' or '{start}'")
 
-    vl.brightness.change(target, int(duration), start_value)
-    return str(target)
+  vlamp_value.change(target, duration, start)
   
-  elif method == 'DELETE':
-    vl.brightness.should_stop = True
-    return 'Stopping current brightness change.'
+  start_text = ''
+  if start:
+    start_text = f' from {start}'
+  return f'Changing brightness{start_text} to {target} in {duration} seconds.'
 
 
+@app.route('/<vlamp_id>/profile/<profile>')
+def launch_profile(vlamp_id, profile):
+  vlamp = vlc.get_vlamp_by_id(vlamp_id)
 
-@app.route('/<vlamp_id>/brightness', methods=['DELETE'])
-@app.route('/<vlamp_id>/brightness/<target>')
-@app.route('/<vlamp_id>/brightness/<target>/<duration>')
-@app.route('/<vlamp_id>/brightness/<target>/<duration>/<start_value>')
-def brightness(vlamp_id, target=None, duration=0, start_value=None):
-  vlc.override(0, False)
-  return change_brightness(vlc.tom, request.method, target, duration, start_value)
-
-  
-@app.route('/nvl/brightness', methods=['DELETE'])
-@app.route('/nvl/brightness/<target>')
-@app.route('/nvl/brightness/<target>/<duration>')
-@app.route('/nvl/brightness/<target>/<duration>/<start_value>')
-def nvl_brightness(target=None, duration=0, start_value=None):
-  return change_brightness(vlc.nom, request.method, target, duration, start_value)
-
-###########
-#endregion# brightness
-########
-
-########
-#region# color_temp
-########
-def change_color_temp(vl, method, target, duration, start_value):
-  if method == 'GET':
-    target = int(target) if target else None
-    start_value = int(start_value) if start_value else None
-
-    vl.color_temp.change(target, int(duration), start_value)
-    return str(target)
-
-  elif method == 'DELETE':
-    vl.color_temp.should_stop = True
-    return 'Stopping current color temp change.'
-
-
-@app.route('/temp', methods=['DELETE'])
-@app.route('/temp/<target>')
-@app.route('/temp/<target>/<duration>')
-@app.route('/temp/<target>/<duration>/<start_value>')
-def color_temp(target=None, duration=0, start_value=None):
-  vlc.override(0, False)
-  return change_color_temp(vlc.tom, request.method, target, duration, start_value)
-
-
-@app.route('/nvl/temp', methods=['DELETE'])
-@app.route('/nvl/temp/<target>')
-@app.route('/nvl/temp/<target>/<duration>')
-@app.route('/nvl/temp/<target>/<duration>/<start_value>')
-def nvl_color_temp(target=None, duration=0, start_value=None):
-  return change_color_temp(vlc.nom, request.method, target, duration, start_value)
-
-###########
-#endregion# color_temp
-########
-
-@app.route('/profile/<p>')
-@app.route('/profile/<p>/<vlamp>')
-@app.route('/profile/<p>/<vlamp>/<args>')
-def profile(p, vlamp=None):
-  if vlamp == 'ovl':
-    vlc.override()
-
-  fn = profiles.profiles.get(p)
+  fn = profiles.profiles.get(profile)
   if fn is not None:
     fn() if vlamp is None else fn(vlc.tom)
-    return f'Executed {p}'
-  return f'Profile "{p}" not found.'
+    return f'Executed {profile}'
+  return f'Profile "{profile}" not found.'
+
+
+
+@app.route('/state')
+def state():
+  # return jsonify({vlamp.id: vlamp.state for vlamp in vlc.vlamps})
+  return jsonify(vlc.active_vlamp.state)
+
 
 @app.route('/when_sunset')
 def when_sunset():
