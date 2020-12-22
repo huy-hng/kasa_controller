@@ -15,12 +15,15 @@ class VLamp:
 		self.lamp_access = False
 		self._on = True
 
-
-		# TODO: refactor brightness and colortemperature to parent class
 		self.brightness = Brightness(set_brightness=self.set_brightness)
-		self.brightness.actual = bulb.brightness
 		self.color_temp = ColorTemperature(set_color_temp=self.set_color_temp)
-		self.color_temp.kelvin = bulb.color_temp
+		self.sync()
+
+
+	def sync(self):
+		self.brightness.internal_value = bulb.brightness
+		self.color_temp.internal_value = bulb.color_temp
+
 
 	@property
 	def on(self):
@@ -32,8 +35,8 @@ class VLamp:
 		if self.lamp_access:
 			if state:
 				asyncio.run(bulb.turn_on())
-				asyncio.run(bulb.set_brightness(self.brightness.actual))
-				asyncio.run(bulb.set_color_temp(self.color_temp.kelvin))
+				asyncio.run(bulb.set_brightness(self.brightness.internal_value))
+				asyncio.run(bulb.set_color_temp(self.color_temp.internal_value))
 				asyncio.run(bulb.update())
 			else:
 				asyncio.run(bulb.turn_off())
@@ -52,13 +55,13 @@ class VLamp:
 			# 	await bulb.update()
 
 			turn_off = False
-			if self.brightness.perceived == 0:
-				self.brightness.perceived = 1
+			if self.brightness.value == 0:
+				self.brightness.value = 1
 				turn_off = True
 
-			log.debug(f'Changing brightness to {self.brightness.perceived}.')
+			log.debug(f'Changing brightness to {self.brightness.value}.')
 			try:
-				await bulb.set_brightness(self.brightness.actual)
+				await bulb.set_brightness(self.brightness.internal_value)
 			except Exception as e:
 				log.exception(e)
 				self.brightness.should_stop = True
@@ -78,9 +81,9 @@ class VLamp:
 			# 	await bulb.turn_on()
 			# 	await bulb.update()
 
-			log.info(f'Changing color temperature to {self.color_temp.kelvin}.')
+			log.info(f'Changing color temperature to {self.color_temp.internal_value}.')
 			try:
-				await bulb.set_color_temp(self.color_temp.kelvin)
+				await bulb.set_color_temp(self.color_temp.internal_value)
 			except Exception as e:
 				log.exception(e)
 				self.brightness.should_stop = True
@@ -92,3 +95,16 @@ class VLamp:
 		if self.brightness.running or self.color_temp.running:
 			return True
 		return False
+
+
+	@property
+	def state(self):
+		return {
+			'id': self.id,
+			'name': self.name,
+			'lamp_access': self.lamp_access,
+			'on': self.on,
+			'brightness': self.brightness.value,
+			'color_temp': self.color_temp.value,
+			'is_running': self.is_running
+		}

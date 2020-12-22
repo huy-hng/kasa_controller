@@ -18,21 +18,21 @@ def check_changes():
 		log.debug('vlamp is running, skipping check')
 		return
 
-	if vlc.active_vlamp.brightness.actual != bulb.brightness:
+	if vlc.active_vlamp.brightness.internal_value != bulb.brightness:
 		# if brightness changed
 		log.debug(f'brightness manually changed from {vlc.active_vlamp.brightness.actual} to {bulb.brightness}')
 
 		override()
-		vlc.active_vlamp.brightness.actual = bulb.brightness
+		vlc.active_vlamp.brightness.internal_value = bulb.brightness
 
 
-	if vlc.active_vlamp.color_temp.kelvin != bulb.color_temp:
+	if vlc.active_vlamp.color_temp.internal_value != bulb.color_temp:
 		# if temperature changed
 		log.debug(f'{vlc.active_vlamp.name}')
 		log.debug(f'temperature manually changed from {vlc.active_vlamp.color_temp.kelvin} to {bulb.color_temp}')
 
 		override()
-		vlc.active_vlamp.color_temp.kelvin = bulb.color_temp
+		vlc.active_vlamp.color_temp.internal_value = bulb.color_temp
 
 
 	if vlc.active_vlamp.on != bulb.is_on:

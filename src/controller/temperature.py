@@ -20,15 +20,15 @@ class ColorTemperature:
 
 
 	@property
-	def percent(self):
+	def value(self):
 		return self._percent
 
 	@property
-	def kelvin(self):
+	def internal_value(self):
 		return self._kelvin
 
-	@percent.setter
-	def percent(self, val):
+	@value.setter
+	def value(self, val):
 		if val < 0: val = 0
 		elif val > 100: val = 100
 
@@ -36,8 +36,8 @@ class ColorTemperature:
 		self._kelvin = self.convert_to_kelvin(val)
 		self.set_color_temp()
 
-	@kelvin.setter
-	def kelvin(self, val):
+	@internal_value.setter
+	def internal_value(self, val):
 		if val < 2700: val = 2700
 		elif val > 6500: val = 6500
 
@@ -66,11 +66,11 @@ class ColorTemperature:
 		asyncio.run(bulb.update())
 
 		if duration==0:
-			self.percent = target_value
+			self.value = target_value
 			self.running = False
 			return
 		elif start_value is not None:
-			self.percent = target_value
+			self.value = target_value
 			time.sleep(1)
 
 		self.transition(target_value, duration)
@@ -80,7 +80,7 @@ class ColorTemperature:
 	def transition(self, target_percent: int, duration:int):
 		target_kelvin = self.convert_to_kelvin(target_percent)
 
-		diff = target_kelvin - self.kelvin
+		diff = target_kelvin - self.internal_value
 
 		if diff == 0: return # return when theres no change to make
 
@@ -96,15 +96,15 @@ class ColorTemperature:
 		amount_of_steps = math.ceil(diff / step_size)
 		single_sleep_dur = helpers.calc_sleep_dur(duration, amount_of_steps)
 
-		steps = helpers.calc_steps(diff, amount_of_steps, step_size, self.kelvin, target_kelvin)
+		steps = helpers.calc_steps(diff, amount_of_steps, step_size, self.internal_value, target_kelvin)
 
 		log.debug(f'{step_size=}')
-		log.info(f'{self.kelvin=} {target_kelvin=} {duration=} {amount_of_steps=} {single_sleep_dur=}')
+		log.info(f'{self.internal_value=} {target_kelvin=} {duration=} {amount_of_steps=} {single_sleep_dur=}')
 
 
 		# transition
 		for step in steps:
-			self.kelvin = step
+			self.internal_value = step
 
 			time.sleep(single_sleep_dur)
 

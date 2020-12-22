@@ -21,22 +21,22 @@ class Brightness:
 	
 
 	@property
-	def actual(self):
+	def internal_value(self):
 		return self._actual
 
 	@property
-	def perceived(self):
+	def value(self):
 		return self._perceived
 
-	@actual.setter
-	def actual(self, val):
+	@internal_value.setter
+	def internal_value(self, val):
 		val = self.check_valid_range(val)
 
 		self._actual = val
 		self._perceived = round(math.sqrt(val*100))
 
-	@perceived.setter
-	def perceived(self, val):
+	@value.setter
+	def value(self, val):
 		val = self.check_valid_range(val)
 
 		self._perceived = val
@@ -62,14 +62,14 @@ class Brightness:
 		self.running = True
 		asyncio.run(bulb.update())
 
-		if duration==0:
+		if duration==0 or (duration is None):
 			# change immediately
-			self.perceived = target_value
+			self.value = target_value
 			self.set_brightness()
 			self.running = False
 			return
 		elif start_value is not None:
-			self.perceived = start_value
+			self.value = start_value
 			self.set_brightness()
 			time.sleep(1)
 
@@ -81,21 +81,21 @@ class Brightness:
 	def transition(self, target_value: int, duration: int):
 		log.debug('transitioning')
 
-		diff = target_value - self.perceived
+		diff = target_value - self.value
 
 		if diff == 0: return # return when theres no change to make
 
 		amount_of_steps, step_size = self.get_steps(duration, diff)
 		single_sleep_dur = helpers.calc_sleep_dur(duration, amount_of_steps)
 
-		steps = helpers.calc_steps(diff, amount_of_steps, step_size, self.perceived, target_value)
+		steps = helpers.calc_steps(diff, amount_of_steps, step_size, self.value, target_value)
 
 		log.info(f'{steps=}')
-		log.info(f'{self.perceived=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
+		log.info(f'{self.value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
 		
 		# transition
 		for step in steps:
-			self.perceived = step
+			self.value = step
 			self.set_brightness()
 
 			time.sleep(single_sleep_dur)
