@@ -25,7 +25,7 @@ class VLampController:
 		""" returns vlamp or None if vlamp with given id doesn't exist. """
 		try:
 			id_ = int(id_)
-		except Exception as e:
+		except ValueError:
 			log.error(f'{id_} is not a valid id.')
 			return self.active_vlamp
 
@@ -35,6 +35,8 @@ class VLampController:
 		for vlamp in self.vlamps:
 			if vlamp.id == id_:
 				return vlamp
+
+		return None
 
 
 	def transition_lamp_modes(self, target_mode: VLamp, duration):

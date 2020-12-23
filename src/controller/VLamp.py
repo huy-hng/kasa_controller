@@ -1,6 +1,8 @@
 import asyncio
 import time
 
+import kasa
+
 from src.controller import helpers, bulb
 from src.controller.brightness import Brightness
 from src.controller.temperature import ColorTemperature
@@ -60,12 +62,8 @@ class VLamp:
 				turn_off = True
 
 			log.debug(f'Changing brightness to {self.brightness.value}.')
-			try:
-				await bulb.set_brightness(self.brightness.internal_value)
-			except Exception as e:
-				log.exception(e)
-				self.brightness.should_stop = True
 
+			await self.retry_on_fail(bulb.set_brightness, self.brightness)
 
 			if turn_off:
 				log.info('Brightness was set to 0, turning lamp off.')
@@ -73,6 +71,24 @@ class VLamp:
 				await bulb.turn_off()
 		else:
 			log.debug(f'{self.name} has no lamp access.')
+
+	async def retry_on_fail(self, fn, val):
+		for _ in range(12):
+			try:
+				await fn(val.internal_value)
+				break
+			except kasa.exceptions.SmartDeviceException as e:
+				if 'Communication error' not in str(e):
+					log.exception(e)
+					break
+				log.error('Cannot Change value due to communication error. Retrying...')
+				time.sleep(5)
+			except Exception as e:
+				log.exception(e)
+				val.should_stop = True
+				break
+
+
 
 	@helpers.run
 	async def set_color_temp(self):
@@ -82,11 +98,7 @@ class VLamp:
 			# 	await bulb.update()
 
 			log.info(f'Changing color temperature to {self.color_temp.internal_value}.')
-			try:
-				await bulb.set_color_temp(self.color_temp.internal_value)
-			except Exception as e:
-				log.exception(e)
-				self.brightness.should_stop = True
+			await self.retry_on_fail(bulb.set_color_temp, self.color_temp)
 		else:
 			log.debug(f'{self.name} has no lamp access.')
 		
