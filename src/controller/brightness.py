@@ -33,14 +33,16 @@ class Brightness:
 		val = self.check_valid_range(val)
 
 		self._actual = val
-		self._perceived = round(math.sqrt(val*100))
+		self._perceived = round( ((23526*val)**(1/3)) - 33 )
+
+
 
 	@value.setter
 	def value(self, val):
 		val = self.check_valid_range(val)
 
 		self._perceived = val
-		self._actual = round((val ** 2) / 100) 
+		self._actual = round(( (val + 33)**3 ) / 23526)
 
 
 	@staticmethod
@@ -48,9 +50,8 @@ class Brightness:
 		if val < 0: val = 0
 		elif val > 100: val = 100
 		return val
-			
 
-	
+
 	@helpers.thread
 	def change(self, target_value: int, duration: int=0, start_value: int=None, abort_new=False):
 		log.info(f'changing brightness to {target_value}, with duration of {duration}')
