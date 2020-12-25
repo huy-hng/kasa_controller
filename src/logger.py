@@ -5,7 +5,7 @@ import os
 if not os.path.isdir('./logs'):
 	os.mkdir('./logs')
 
-log = logging.getLogger('root')
+log = logging.getLogger('LOG')
 log.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter(
