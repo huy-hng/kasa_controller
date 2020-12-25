@@ -1,8 +1,8 @@
 import time
 from functools import wraps
 
-from ..controller import helpers
-from ..logger import log
+from src.controller import helpers
+from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 def looper(sleep: int):

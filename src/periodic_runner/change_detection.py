@@ -1,7 +1,7 @@
 import asyncio
 
-from ..controller import bulb, vlc
-from ..logger import log
+from src.controller import bulb, vlc
+from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 

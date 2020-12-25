@@ -8,7 +8,6 @@ from src.logger import log
 
 class VLampController:
 	def __init__(self):
-		print('initializing VLampController')
 		log.info('initializing VLampController')
 
 		self.nom = VLamp(0, 'Normal Operation')
@@ -46,7 +45,7 @@ class VLampController:
 			time.sleep(0.1)
 
 
-	def set_active_lamp(self, id_, duration=1):
+	def set_active_vlamp(self, id_, duration=1):
 		target = self.get_vlamp_by_id(id_)
 
 		if target is None:

@@ -5,7 +5,6 @@ from src.app import app
 from src.periodic_runner.check_time import check_time
 import settings
 
-
 # periodic_runner.check_values()
 check_time()
 
