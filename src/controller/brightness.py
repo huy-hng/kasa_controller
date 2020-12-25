@@ -1,83 +1,29 @@
 import math
 import time
-import asyncio
-import typing
 from dataclasses import dataclass
 
-from src.controller import helpers, SINGLE_CHANGE_DUR, bulb
+from src.controller import helpers, SINGLE_CHANGE_DUR
 from src.logger import log
+
+from src.controller.parent_value_class import Parent
 
 # pylint: disable=logging-fstring-interpolation
 # pylint: disable=multiple-statements
 
-@dataclass
-class Brightness:
-	_actual = 0
-	_perceived = 0
-	set_brightness: typing.Callable
-
-	running = False
-	should_stop = False
-	
-
-	@property
-	def internal_value(self):
-		return self._actual
-
-	@property
-	def value(self):
-		return self._perceived
-
-	@internal_value.setter
-	def internal_value(self, val):
-		val = self.check_valid_range(val)
-
-		self._actual = val
-		self._perceived = round( ((23526*val)**(1/3)) - 33 )
-
-
-
-	@value.setter
-	def value(self, val):
-		val = self.check_valid_range(val)
-
-		self._perceived = val
-		self._actual = round(( (val + 33)**3 ) / 23526)
+class Brightness(Parent):
+	def __init__(self, set_val_fn):
+		self.internal_valid_range = (0, 100)
+		self.external_valid_range = (0, 100)
+		self.set_val_fn = set_val_fn
 
 
 	@staticmethod
-	def check_valid_range(val):
-		if val < 0: val = 0
-		elif val > 100: val = 100
-		return val
+	def convert_to_external(internal: int) -> int:
+		return round( ((23526*internal)**(1/3)) - 33 )
 
-
-	@helpers.thread
-	def change(self, target_value: int, duration: int=0, start_value: int=None, abort_new=False):
-		log.info(f'changing brightness to {target_value}, with duration of {duration}')
-		if abort_new and self.running:
-			return
-
-		self.wait_for_stop()
-
-		self.running = True
-		asyncio.run(bulb.update())
-
-		if duration==0 or (duration is None):
-			# change immediately
-			self.value = target_value
-			self.set_brightness()
-			self.running = False
-			return
-		elif start_value is not None:
-			self.value = start_value
-			self.set_brightness()
-			time.sleep(1)
-
-
-		self.transition(target_value, duration)
-		self.running = False
-
+	@staticmethod
+	def convert_to_internal(external: int) -> int:
+		return round(( (external + 33)**3 ) / 23526)
 
 	def transition(self, target_value: int, duration: int):
 		log.debug('transitioning')
@@ -97,7 +43,7 @@ class Brightness:
 		# transition
 		for step in steps:
 			self.value = step
-			self.set_brightness()
+			self.set_val_fn()
 
 			time.sleep(single_sleep_dur)
 
@@ -120,10 +66,3 @@ class Brightness:
 		# log.debug(f'{step_size=}')
 		amount_of_steps = math.ceil(diff / step_size)
 		return amount_of_steps, step_size
-
-	def wait_for_stop(self):
-		if self.running:
-			self.should_stop = True
-
-		while self.running:
-			time.sleep(0.1)

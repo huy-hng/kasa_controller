@@ -1,84 +1,35 @@
 import math
-import typing
 import time
-import asyncio
 from dataclasses import dataclass
 
-from src.controller import helpers, SINGLE_CHANGE_DUR, bulb
+from src.controller import helpers, SINGLE_CHANGE_DUR
 from src.logger import log
+
+from src.controller.parent_value_class import Parent
+
 
 # pylint: disable=logging-fstring-interpolation
 
 @dataclass
-class ColorTemperature:
-	_percent = 0
-	_kelvin = 2700
-	set_color_temp: typing.Callable
-	
-	running = False
-	should_stop = False
+class ColorTemperature(Parent):
+	def __init__(self, set_val_fn):
+		self.internal_valid_range = (2700, 6500)
+		self.external_valid_range = (0, 100)
+		self.set_val_fn = set_val_fn
 
-
-	@property
-	def value(self):
-		return self._percent
-
-	@property
-	def internal_value(self):
-		return self._kelvin
-
-	@value.setter
-	def value(self, val):
-		if val < 0: val = 0
-		elif val > 100: val = 100
-
-		self._percent = val
-		self._kelvin = self.convert_to_kelvin(val)
-		self.set_color_temp()
-
-	@internal_value.setter
-	def internal_value(self, val):
-		if val < 2700: val = 2700
-		elif val > 6500: val = 6500
-
-		self._percent = self.convert_to_percent(val)
-		self._kelvin = val
-		self.set_color_temp()
 
 	@staticmethod
-	def convert_to_percent(kelvin) -> int:
-		return int((kelvin - 2700) / 38)
+	def convert_to_external(internal) -> int:
+		return int((internal - 2700) / 38)
 
 	@staticmethod
-	def convert_to_kelvin(percent) -> int:
-		return int(38 * percent + 2700)
+	def convert_to_internal(external) -> int:
+		return int(38 * external + 2700)
 
 
-	@helpers.thread
-	def change(self, target_value: int, duration: int, start_value: int=None, abort_new=False):
-		log.info(f'changing color temp to {target_value}, with duration of {duration}')
-		if abort_new and self.running:
-			return
 
-		self.wait_for_stop()
-
-		self.running = True
-		asyncio.run(bulb.update())
-
-		if duration==0:
-			self.value = target_value
-			self.running = False
-			return
-		elif start_value is not None:
-			self.value = target_value
-			time.sleep(1)
-
-		self.transition(target_value, duration)
-		self.running = False
-
-
-	def transition(self, target_percent: int, duration:int):
-		target_kelvin = self.convert_to_kelvin(target_percent)
+	def transition(self, target_value: int, duration:int):
+		target_kelvin = self.convert_to_internal(target_value)
 
 		diff = target_kelvin - self.internal_value
 
@@ -105,6 +56,7 @@ class ColorTemperature:
 		# transition
 		for step in steps:
 			self.internal_value = step
+			self.set_val_fn()
 
 			time.sleep(single_sleep_dur)
 

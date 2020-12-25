@@ -17,8 +17,8 @@ class VLamp:
 		self.lamp_access = False
 		self._on = True
 
-		self.brightness = Brightness(set_brightness=self.set_brightness)
-		self.color_temp = ColorTemperature(set_color_temp=self.set_color_temp)
+		self.brightness = Brightness(set_val_fn=self.set_brightness)
+		self.color_temp = ColorTemperature(set_val_fn=self.set_color_temp)
 		self.sync()
 
 
@@ -71,6 +71,7 @@ class VLamp:
 				await bulb.turn_off()
 		else:
 			log.debug(f'{self.name} has no lamp access.')
+
 
 	async def retry_on_fail(self, fn, val):
 		for _ in range(12):
