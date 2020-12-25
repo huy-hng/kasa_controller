@@ -2,9 +2,10 @@ import os
 
 from flask import Flask, request, render_template, jsonify
 
-from .periodic_runner.change_detection import check_changes
+# from .periodic_runner.change_detection import check_changes
+
 from .controller import vlc, profiles
-from .logger import log
+from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 app = Flask(__name__)
@@ -15,9 +16,9 @@ def home():
   return render_template('home.html', vlc=vlc, environment=os.getenv('ENVIRONMENT')) # FIX: vulneralbility
 
 
-@app.route('/check_for_changes')
-def check_for_changes():
-  check_changes()
+# @app.route('/check_for_changes')
+# def check_for_changes():
+#   check_changes()
 
 
 @app.route('/set_active_vlamp/<id_>')
@@ -28,9 +29,12 @@ def set_active_vlamp(id_=None):
     log.error(f"id has to be an int and not '{id_}'")
     return jsonify(success=False), 400
   
-  vlc.set_active_lamp(id_)
+  vlc.set_active_vlamp(id_)
   return jsonify(success=True)
 
+@app.route('/handlers')
+def handlers():
+  return str(len(log.handlers))
 
 @app.route('/<vlamp_id>/on')
 def on(vlamp_id):
@@ -47,11 +51,14 @@ def off(vlamp_id):
 
 @app.route('/<vlamp_id>/brightness', methods=['GET', 'DELETE'])
 @app.route('/<vlamp_id>/color_temp', methods=['GET', 'DELETE'])
-def handle_action(vlamp_id=0):
+def choose_action(vlamp_id=0):
+  if vlamp_id == 0:
+    return
+
   vlamp = vlc.get_vlamp_by_id(vlamp_id)
 
-  if vlamp.id != vlc.active_vlamp.id:
-    vlc.set_active_lamp(vlamp.id, 0)
+  if vlc.active_vlamp.id != 2:
+    vlc.set_active_vlamp(vlamp.id, 0)
 
   action = request.path.split('/')[2]
   if action == 'brightness':
@@ -59,38 +66,40 @@ def handle_action(vlamp_id=0):
   else:
     vlamp_value = vlamp.color_temp
 
-  log.debug(f'{vlamp.name}')
-  return handle_change_endpoint(vlamp_value, request)
+  return handle_method(vlamp_value, request)
 
-def handle_change_endpoint(vlamp_value, req):
+def handle_method(vlamp_value, req):
   if req.method == 'GET':
-    target = req.args.get('target')
-    duration = req.args.get('duration')
-    start = req.args.get('start')
 
-    if target is None:
+    if req.args.get('target') is None:
       return str(vlamp_value.value)
-    return set_value(vlamp_value, target, duration, start)
+    return set_value(vlamp_value, req)
 
   elif request.method == 'DELETE':
     vlamp_value.should_stop = True
     return 'Stopped brightness change.'
 
-def set_value(vlamp_value, target, duration, start):
+def set_value(vlamp_value, req):
+  target = req.args.get('target')
+  duration = req.args.get('duration')
+  start = req.args.get('start')
+
   log.debug(f'{target=} {duration=} {start=}')
-  try:
+  try:  
     target = int(target) if target else None
     duration = int(duration) if duration else 0
     start = int(start) if start else None
-  except Exception as e:
-    log.error(f"Values need to convertable to an int and not '{target}', '{duration}' or '{start}'")
+  except ValueError:
+    error_message = f"Values need to convertable to an int and not '{target}', '{duration}' or '{start}'"
+    log.warning(error_message)
+    return error_message
 
   vlamp_value.change(target, duration, start)
   
   start_text = ''
   if start:
     start_text = f' from {start}'
-  return f'Changing brightness{start_text} to {target} in {duration} seconds.'
+  return f'Changing value{start_text} to {target} in {duration} seconds.'
 
 
 @app.route('/<vlamp_id>/profile/<profile>')
