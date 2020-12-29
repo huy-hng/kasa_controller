@@ -75,20 +75,21 @@ class Parent:
 
 		self.wait_for_stop()
 
-		self.running = True
-		# asyncio.run(bulb.update())
-
 		if duration==0 or (duration is None):
 			# change immediately
 			self.value = target_value
 			# self.set_val_fn()
-			self.running = False
 			return
-		elif start_value is not None:
+
+
+		# asyncio.run(bulb.update())
+
+		if start_value is not None:
 			self.value = start_value
 			# self.set_val_fn()
 			time.sleep(1)
 
+		self.running = True
 		self.transition(target_value, duration)
 		self.running = False
 
