@@ -11,9 +11,9 @@ class VLampController:
 	def __init__(self):
 		log.info('initializing VLampController')
 
-		self.nom = VLamp(id_=0, name='Normal Operation', short_name='nom')
-		self.tom = VLamp(id_=1, name='Temporary Override', short_name='tom')
-		self.pom = VLamp(id_=2, name='Permanent Override', short_name='pom')
+		self.nom = VLamp(id_='nom', name='Normal Operation')
+		self.tom = VLamp(id_='tom', name='Temporary Override')
+		self.pom = VLamp(id_='pom', name='Permanent Override')
 		
 
 		self.all_vlamps = [self.nom, self.tom, self.pom]
@@ -22,33 +22,18 @@ class VLampController:
 		self.nom.lamp_access = True
 
 
-	def find_vlamp(self, search_term: str) -> VLamp:
-		""" returns vlamp or active_lamp if vlamp with given search_term doesn't exist. """
+	def find_vlamp(self, id_: str) -> VLamp:
+		""" returns vlamp or active_lamp if vlamp with given id doesn't exist. """
 
-		not_found_message = f'Could not find VLamp {search_term}.'
-
-		log.info(f'Searching for lamp with the short name {search_term}.')
+		log.info(f'Searching for lamp with id {id_}.')
 		for vlamp in self.all_vlamps:
-			if vlamp.short_name == search_term:
+			if vlamp.id == id_:
 				return vlamp
 
-		try:
-			id_ = int(search_term)
-		except ValueError as e:
-			log.warning(not_found_message)
-			raise exceptions.VLampNotFoundException(not_found_message) from e # TODO: test this
+		not_found_message = f'Could not find VLamp {id_}.'
+		log.warning(not_found_message)
+		raise exceptions.VLampNotFoundException(not_found_message) # TODO: test this
 
-		else:
-			log.info(f'Searching for lamp id {id_}.')
-			if id_ == -1:
-				return self.active_vlamp
-
-			for vlamp in self.all_vlamps:
-				if vlamp.id == id_:
-					return vlamp
-
-			log.warning(not_found_message)
-			raise exceptions.VLampNotFoundException(not_found_message) from e # TODO: test this
 
 
 	def set_active_vlamp(self, vlamp: VLamp):
@@ -60,7 +45,7 @@ class VLampController:
 
 
 	def transition_to_vlamp(self, target_vlamp: VLamp, transition_duration=0):
-		temporary_vlamp = VLamp(99, 'Temporary Vlamp', 'temp')
+		temporary_vlamp = VLamp('temp', 'Temporary Vlamp')
 		self.all_vlamps.append(temporary_vlamp)
 
 		self.set_active_vlamp(temporary_vlamp)

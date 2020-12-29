@@ -12,12 +12,11 @@ from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 class VLamp:
-	def __init__(self, id_: int, name: str, short_name: str):
-		self.id = id_
+	def __init__(self, id_: str, name: str):
 		self.name = name
-		self.short_name = short_name
+		self.id = id_
+
 		self._on = True
-		self.lamp_access = False
 		self._lamp_access = False
 
 		self.brightness = Brightness(set_val_fn=self.set_brightness)
@@ -125,7 +124,6 @@ class VLamp:
 		return {
 			'id': self.id,
 			'name': self.name,
-			'short_name': self.short_name,
 			'lamp_access': self.lamp_access,
 			'on': self.on,
 			'brightness': self.brightness.value,
