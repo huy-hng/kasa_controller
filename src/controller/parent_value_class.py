@@ -78,7 +78,7 @@ class Parent:
 		if duration==0 or (duration is None):
 			# change immediately
 			self.value = target_value
-			# self.set_val_fn()
+			self.set_val_fn()
 			return
 
 
@@ -86,7 +86,7 @@ class Parent:
 
 		if start_value is not None:
 			self.value = start_value
-			# self.set_val_fn()
+			self.set_val_fn()
 			time.sleep(1)
 
 		self.running = True
