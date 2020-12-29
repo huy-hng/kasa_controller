@@ -1,5 +1,6 @@
 import asyncio
 import time
+from dataclasses import dataclass
 
 import kasa
 
@@ -11,15 +12,28 @@ from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 class VLamp:
-	def __init__(self, id_: int, name: str):
+	def __init__(self, id_: int, name: str, short_name: str):
 		self.id = id_
 		self.name = name
-		self.lamp_access = False
+		self.short_name = short_name
 		self._on = True
+		self.lamp_access = False
+		self._lamp_access = False
 
 		self.brightness = Brightness(set_val_fn=self.set_brightness)
 		self.color_temp = ColorTemperature(set_val_fn=self.set_color_temp)
 		self.sync()
+
+	@property
+	def lamp_access(self):
+		return self._lamp_access
+
+	@lamp_access.setter
+	def lamp_access(self, val: bool):
+		self._lamp_access = val
+		if val:
+			self.set_brightness()
+			self.set_color_temp()
 
 
 	def sync(self):
@@ -34,6 +48,7 @@ class VLamp:
 	@on.setter
 	def on(self, state: bool):
 		self._on = state
+		# TODO: check if I can just use self.set_brightness and self.set_color_temp()
 		if self.lamp_access:
 			if state:
 				asyncio.run(bulb.turn_on())
@@ -50,18 +65,18 @@ class VLamp:
 
 	@helpers.run
 	async def set_brightness(self):
+		turn_off = False
+		if self.brightness.value == 0:
+			self.brightness.value = 1
+			turn_off = True
+
 		if self.lamp_access:
 			# if not bulb.is_on:
 			# 	log.debug('Lamp is off, turning on.')
 			# 	await bulb.turn_on()
 			# 	await bulb.update()
 
-			turn_off = False
-			if self.brightness.value == 0:
-				self.brightness.value = 1
-				turn_off = True
-
-			log.debug(f'Changing brightness to {self.brightness.value}.')
+			log.debug(f'{self.name} hanging brightness to {self.brightness.value}.')
 
 			await self.retry_on_fail(bulb.set_brightness, self.brightness)
 
@@ -73,6 +88,14 @@ class VLamp:
 			log.debug(f'{self.name} has no lamp access.')
 
 
+	@helpers.run
+	async def set_color_temp(self):
+		if self.lamp_access:
+			log.info(f'{self.name} Changing color temperature to {self.color_temp.internal_value}.')
+			await self.retry_on_fail(bulb.set_color_temp, self.color_temp)
+		else:
+			log.debug(f'{self.name} has no lamp access.')
+		
 	async def retry_on_fail(self, fn, val):
 		for _ in range(12):
 			try:
@@ -90,19 +113,6 @@ class VLamp:
 				break
 
 
-
-	@helpers.run
-	async def set_color_temp(self):
-		if self.lamp_access:
-			# if not bulb.is_on:
-			# 	await bulb.turn_on()
-			# 	await bulb.update()
-
-			log.info(f'Changing color temperature to {self.color_temp.internal_value}.')
-			await self.retry_on_fail(bulb.set_color_temp, self.color_temp)
-		else:
-			log.debug(f'{self.name} has no lamp access.')
-		
 	@property
 	def is_running(self):
 		if self.brightness.running or self.color_temp.running:
@@ -115,6 +125,7 @@ class VLamp:
 		return {
 			'id': self.id,
 			'name': self.name,
+			'short_name': self.short_name,
 			'lamp_access': self.lamp_access,
 			'on': self.on,
 			'brightness': self.brightness.value,
