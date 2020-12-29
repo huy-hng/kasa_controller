@@ -16,49 +16,65 @@ def home():
   return render_template('home.html', vlc=vlc, environment=os.getenv('ENVIRONMENT')) # FIX: vulneralbility
 
 
-# @app.route('/check_for_changes')
-# def check_for_changes():
-#   check_changes()
+@app.route('/state')
+def state():
+  return vlc.state()
+
+@app.route('/active_state')
+def active_state():
+  return jsonify(vlc.active_vlamp.state)
 
 
-@app.route('/set_active_vlamp/<id_>')
-def set_active_vlamp(id_=None):
+def find_vlamp(vlamp: str):
   try:
-    id_ = int(id_)
-  except Exception as e:
-    log.error(f"id has to be an int and not '{id_}'")
-    return jsonify(success=False), 400
-  
-  vlc.set_active_vlamp(id_)
-  return jsonify(success=True)
+    return vlc.find_vlamp(vlamp)
+  except:
+    return jsonify(success=False, 
+                   message=f'VLamp {vlamp} does not exist.'), 400
 
-@app.route('/handlers')
-def handlers():
-  return str(len(log.handlers))
 
-@app.route('/<vlamp_id>/on')
-def on(vlamp_id):
-  vlamp = vlc.get_vlamp_by_id(vlamp_id)
+@app.route('/set_active_vlamp/<vlamp>')
+def set_active_vlamp(vlamp=None):
+  vlamp = find_vlamp(vlamp)
+  if isinstance(vlamp, tuple):
+    return vlamp
+
+  vlc.transition_to_vlamp(vlamp)
+
+  return jsonify(success=True), 200
+
+
+@app.route('/<vlamp>/on')
+def on(vlamp):
+  vlamp = find_vlamp(vlamp)
+  if isinstance(vlamp, tuple):
+    return vlamp
+
   vlamp.on = True
   return f'Turning {vlamp.name} on'
 
-@app.route('/<vlamp_id>/off')
-def off(vlamp_id):
-  vlamp = vlc.get_vlamp_by_id(vlamp_id)
+@app.route('/<vlamp>/off')
+def off(vlamp):
+  vlamp = find_vlamp(vlamp)
+  if isinstance(vlamp, tuple):
+    return vlamp
+
   vlamp.on = False
   return f'Turning {vlamp.name} off'
 
 
-@app.route('/<vlamp_id>/brightness', methods=['GET', 'DELETE'])
-@app.route('/<vlamp_id>/color_temp', methods=['GET', 'DELETE'])
-def choose_action(vlamp_id=0):
-  if vlamp_id == 0:
+@app.route('/<vlamp>/brightness', methods=['GET', 'DELETE'])
+@app.route('/<vlamp>/color_temp', methods=['GET', 'DELETE'])
+def choose_action(vlamp=0):
+  if vlamp == 0 or vlamp == 'nom':
     return
 
-  vlamp = vlc.get_vlamp_by_id(vlamp_id)
+  vlamp = find_vlamp(vlamp)
+  if isinstance(vlamp, tuple):
+    return vlamp
 
-  if vlc.active_vlamp.id != 2:
-    vlc.set_active_vlamp(vlamp.id, 0)
+  if vlc.active_vlamp.id != 'pom':
+    vlc.set_active_vlamp(vlamp)
 
   action = request.path.split('/')[2]
   if action == 'brightness':
@@ -102,9 +118,11 @@ def set_value(vlamp_value, req):
   return f'Changing value{start_text} to {target} in {duration} seconds.'
 
 
-@app.route('/<vlamp_id>/profile/<profile>')
-def launch_profile(vlamp_id, profile):
-  vlamp = vlc.get_vlamp_by_id(vlamp_id)
+@app.route('/<vlamp>/profile/<profile>')
+def launch_profile(vlamp, profile):
+  vlamp = find_vlamp(vlamp)
+  if isinstance(vlamp, tuple):
+    return vlamp
 
   fn = profiles.profiles.get(profile)
   if fn is not None:
@@ -112,12 +130,6 @@ def launch_profile(vlamp_id, profile):
     return f'Executed {profile}'
   return f'Profile "{profile}" not found.'
 
-
-
-@app.route('/state')
-def state():
-  # return jsonify({vlamp.id: vlamp.state for vlamp in vlc.vlamps})
-  return jsonify(vlc.active_vlamp.state)
 
 
 @app.route('/when_sunset')
