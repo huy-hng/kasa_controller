@@ -66,14 +66,15 @@ def off(vlamp):
 @app.route('/<vlamp>/brightness', methods=['GET', 'DELETE'])
 @app.route('/<vlamp>/color_temp', methods=['GET', 'DELETE'])
 def choose_action(vlamp=0):
-  if vlamp == 0 or vlamp == 'nom':
-    return
-
   vlamp = find_vlamp(vlamp)
   if isinstance(vlamp, tuple):
     return vlamp
 
-  if vlc.active_vlamp.id != 'pom':
+  if vlamp.id == 'nom':
+    return
+
+  current_vlamp_id = vlc.active_vlamp.id
+  if current_vlamp_id != 'pom' and current_vlamp_id != vlamp.id:
     vlc.set_active_vlamp(vlamp)
 
   action = request.path.split('/')[2]
@@ -82,6 +83,7 @@ def choose_action(vlamp=0):
   else:
     vlamp_value = vlamp.color_temp
 
+  log.debug(f'{request.args=}')
   return handle_method(vlamp_value, request)
 
 def handle_method(vlamp_value, req):
