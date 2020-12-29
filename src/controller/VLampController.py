@@ -1,5 +1,6 @@
 import time
 
+from src import exceptions
 from src.controller import helpers
 from src.controller.VLamp import VLamp
 from src.logger import log
@@ -21,20 +22,21 @@ class VLampController:
 		self.nom.lamp_access = True
 
 
-	def find_vlamp(self, search_term) -> VLamp:
+	def find_vlamp(self, search_term: str) -> VLamp:
 		""" returns vlamp or active_lamp if vlamp with given search_term doesn't exist. """
+
+		not_found_message = f'Could not find VLamp {search_term}.'
+
+		log.info(f'Searching for lamp with the short name {search_term}.')
+		for vlamp in self.all_vlamps:
+			if vlamp.short_name == search_term:
+				return vlamp
 
 		try:
 			id_ = int(search_term)
-
-		except ValueError:
-			log.info(f'Searching for lamp with the short name {search_term}.')
-			for vlamp in self.all_vlamps:
-				if vlamp.short_name == search_term:
-					return vlamp
-
-			log.warning(f'Could not find {search_term}. Returning Active Lamp.')
-			return self.active_vlamp
+		except ValueError as e:
+			log.warning(not_found_message)
+			raise exceptions.VLampNotFoundException(not_found_message) from e # TODO: test this
 
 		else:
 			log.info(f'Searching for lamp id {id_}.')
@@ -45,6 +47,8 @@ class VLampController:
 				if vlamp.id == id_:
 					return vlamp
 
+			log.warning(not_found_message)
+			raise exceptions.VLampNotFoundException(not_found_message) from e # TODO: test this
 
 
 	def set_active_vlamp(self, vlamp: VLamp):
