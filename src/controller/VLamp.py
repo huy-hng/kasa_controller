@@ -75,7 +75,7 @@ class VLamp:
 			# 	await bulb.turn_on()
 			# 	await bulb.update()
 
-			log.debug(f'{self.name} hanging brightness to {self.brightness.value}.')
+			log.info(f'{self.name} changing brightness to {self.brightness.value}.')
 
 			await self.retry_on_fail(bulb.set_brightness, self.brightness)
 
@@ -90,7 +90,7 @@ class VLamp:
 	@helpers.run
 	async def set_color_temp(self):
 		if self.lamp_access:
-			log.info(f'{self.name} Changing color temperature to {self.color_temp.internal_value}.')
+			log.info(f'{self.name} changing color temperature to {self.color_temp.internal_value}.')
 			await self.retry_on_fail(bulb.set_color_temp, self.color_temp)
 		else:
 			log.debug(f'{self.name} has no lamp access.')
