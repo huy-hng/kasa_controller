@@ -28,20 +28,21 @@ class VLampController:
 		log.info(f'Searching for lamp with id {id_}.')
 		for vlamp in self.all_vlamps:
 			if vlamp.id == id_:
+				log.info(f'Found VLamp with id {vlamp.id}')
 				return vlamp
 
 		not_found_message = f'Could not find VLamp {id_}.'
 		log.warning(not_found_message)
-		raise exceptions.VLampNotFoundException(not_found_message) # TODO: test this
-
+		raise exceptions.VLampNotFoundException(not_found_message)
 
 
 	def set_active_vlamp(self, vlamp: VLamp):
 		self.active_vlamp = vlamp
-		for vlamp in self.all_vlamps:
-			vlamp.lamp_access = False
-		vlamp.lamp_access = True
+		
+		for v in self.all_vlamps:
+			v.lamp_access = False
 
+		vlamp.lamp_access = True
 
 
 	def transition_to_vlamp(self, target_vlamp: VLamp, transition_duration=0):
