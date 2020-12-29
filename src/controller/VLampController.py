@@ -10,57 +10,67 @@ class VLampController:
 	def __init__(self):
 		log.info('initializing VLampController')
 
-		self.nom = VLamp(0, 'Normal Operation')
-		self.tom = VLamp(1, 'Temporary Override')
-		self.pom = VLamp(2, 'Permanent Override')
+		self.nom = VLamp(id_=0, name='Normal Operation', short_name='nom')
+		self.tom = VLamp(id_=1, name='Temporary Override', short_name='tom')
+		self.pom = VLamp(id_=2, name='Permanent Override', short_name='pom')
+		
 
-		self.vlamps = [self.nom, self.tom, self.pom]
+		self.all_vlamps = [self.nom, self.tom, self.pom]
 
 		self.active_vlamp = self.nom
 		self.nom.lamp_access = True
 
 
-	def get_vlamp_by_id(self, id_) -> VLamp:
-		""" returns vlamp or None if vlamp with given id doesn't exist. """
+	def find_vlamp(self, search_term) -> VLamp:
+		""" returns vlamp or active_lamp if vlamp with given search_term doesn't exist. """
+
 		try:
-			id_ = int(id_)
+			id_ = int(search_term)
+
 		except ValueError:
-			log.error(f'{id_} is not a valid id.')
+			log.info(f'Searching for lamp with the short name {search_term}.')
+			for vlamp in self.all_vlamps:
+				if vlamp.short_name == search_term:
+					return vlamp
+
+			log.warning(f'Could not find {search_term}. Returning Active Lamp.')
 			return self.active_vlamp
 
-		if id_ == -1:
-			return self.active_vlamp
+		else:
+			log.info(f'Searching for lamp id {id_}.')
+			if id_ == -1:
+				return self.active_vlamp
 
-		for vlamp in self.vlamps:
-			if vlamp.id == id_:
-				return vlamp
-
-		return None
+			for vlamp in self.all_vlamps:
+				if vlamp.id == id_:
+					return vlamp
 
 
-	def transition_lamp_modes(self, target_mode: VLamp, duration):
-		self.active_vlamp.brightness.change(target_mode.brightness.value, duration)
-		self.active_vlamp.color_temp.change(target_mode.color_temp.value, duration)
-		while self.active_vlamp.is_running:
+
+	def set_active_vlamp(self, vlamp: VLamp):
+		self.active_vlamp = vlamp
+		for vlamp in self.all_vlamps:
+			vlamp.lamp_access = False
+		vlamp.lamp_access = True
+
+
+
+	def transition_to_vlamp(self, target_vlamp: VLamp, transition_duration=0):
+		temporary_vlamp = VLamp(99, 'Temporary Vlamp', 'temp')
+		self.all_vlamps.append(temporary_vlamp)
+
+		self.set_active_vlamp(temporary_vlamp)
+
+		temporary_vlamp.brightness.change(target_vlamp.brightness.value, transition_duration)
+		temporary_vlamp.color_temp.change(target_vlamp.color_temp.value, transition_duration)
+		
+		while temporary_vlamp.is_running:
 			time.sleep(0.1)
 
+		self.all_vlamps.remove(temporary_vlamp)
 
-	def set_active_vlamp(self, id_, duration=1):
-		target = self.get_vlamp_by_id(id_)
+		self.set_active_vlamp(target_vlamp)
 
-		if target is None:
-			log.error(f"VLamp with the id of '{id_}' could not been found. Leaving active lamp as is.")
-			return
 
-		self.transition_lamp_modes(target, duration)
-
-		for vlamp in self.vlamps:
-			vlamp.lamp_access = False
-
-		target.lamp_access = True
-		self.active_vlamp = target
-
-		log.info(f'{self.active_vlamp.name=}')
-		log.debug(f'{self.nom.lamp_access=}')
-		log.debug(f'{self.tom.lamp_access=}')
-		log.debug(f'{self.pom.lamp_access=}')
+	def state(self):
+		pass
