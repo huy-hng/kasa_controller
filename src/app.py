@@ -18,7 +18,7 @@ def home():
 
 @app.route('/state')
 def state():
-  return vlc.state()
+  return jsonify(vlc.state())
 
 @app.route('/active_state')
 def active_state():
