@@ -52,6 +52,8 @@ def sunset(vlamp=vlc.nom):
 	_, duration = get_sunset()
 
 	log.info('running sunset profile')
+	
+	vlc.change_to_nom()	
 	vlamp.color_temp.change(0, duration.seconds, abort_new=True)
 		
 
@@ -59,8 +61,11 @@ def sunset(vlamp=vlc.nom):
 @helpers.run
 async def wake_up(vlamp=vlc.nom, duration=600):
 	log.warning('Running Wake Up profile.')
-	await bulb.turn_on()
-	await bulb.update()
+	if vlc.active_vlamp.id != 'pom':
+		await bulb.turn_on()
+		await bulb.update()
+
+	vlc.change_to_nom()
 	
 	vlamp.brightness.change(100, duration/2)
 	time.sleep(duration/2)
