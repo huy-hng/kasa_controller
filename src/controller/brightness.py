@@ -26,7 +26,7 @@ class Brightness(Parent):
 		return round(( (external + 33)**3 ) / 23526)
 
 	def transition(self, target_value: int, duration: int):
-		log.debug('transitioning')
+		log.info(f'Transitioning to {target_value} with duration of {duration}')
 
 		diff = target_value - self.value
 
@@ -41,6 +41,7 @@ class Brightness(Parent):
 		log.info(f'{self.value=} {target_value=} {amount_of_steps=} {single_sleep_dur=}')
 		
 		# transition
+
 		for step in steps:
 			self.value = step
 			self.set_val_fn()
@@ -49,8 +50,11 @@ class Brightness(Parent):
 
 			if self.should_stop:
 				self.should_stop = False
+				log.info('Stopping Brightness change.')
 				break
-		
+
+		log.debug('Done transitioning.')
+
 
 	@staticmethod
 	def get_steps(duration, diff):

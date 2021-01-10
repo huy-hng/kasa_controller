@@ -5,7 +5,7 @@ from flask import Flask, request, render_template, jsonify
 
 # from .periodic_runner.change_detection import check_changes
 
-from .controller import vlc, profiles
+from .controller import vlc, profiles, VLamp
 from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
@@ -46,12 +46,14 @@ def active_state():
 
 
 
-@app.route('/set_active_vlamp/<vlamp>')
+@app.route('/<vlamp>/set_active')
 @vlamp_required
-def set_active_vlamp(vlamp=None):
+def set_active_vlamp(vlamp: VLamp.VLamp):
+	if vlamp.id == 'nom':
+		vlc.transition_to_vlamp(vlamp, int(request.args.get('duration')))
+		return jsonify(success=True), 200
 
-	vlc.transition_to_vlamp(vlamp)
-
+	vlc.copy_vlamp(vlamp)
 	return jsonify(success=True), 200
 
 
@@ -71,7 +73,7 @@ def off(vlamp):
 @app.route('/<vlamp>/brightness', methods=['GET', 'DELETE'])
 @app.route('/<vlamp>/color_temp', methods=['GET', 'DELETE'])
 @vlamp_required
-def choose_action(vlamp=0):
+def choose_action(vlamp):
 	if vlamp.id == 'nom':
 		return
 
@@ -85,7 +87,6 @@ def choose_action(vlamp=0):
 	else:
 		vlamp_value = vlamp.color_temp
 
-	log.debug(f'{request.args=}')
 	return handle_method(vlamp_value, request)
 
 def handle_method(vlamp_value, req):

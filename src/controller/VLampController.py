@@ -45,18 +45,30 @@ class VLampController:
 
 
 	def transition_to_vlamp(self, target_vlamp: VLamp, transition_duration=0):
+		log.info(f'Transitioning to VLamp {target_vlamp.name} with duration of {transition_duration}')
+		log.debug(f'{transition_duration}, {type(transition_duration)}')
+
 		temporary_vlamp = VLamp('temp', 'Temporary Vlamp')
 		self.all_vlamps.append(temporary_vlamp)
 
-		self.set_active_vlamp(temporary_vlamp)
+		self.copy_vlamp(temporary_vlamp)
+
 
 		temporary_vlamp.brightness.change(target_vlamp.brightness.value, transition_duration)
 		temporary_vlamp.color_temp.change(target_vlamp.color_temp.value, transition_duration)
 		
 		while temporary_vlamp.is_running:
 			time.sleep(0.1)
+			
+		log.debug(f'Transition done.')
 
 		self.all_vlamps.remove(temporary_vlamp)
+
+		self.set_active_vlamp(target_vlamp)
+
+	def copy_vlamp(self, target_vlamp: VLamp):
+		target_vlamp.brightness.value = self.active_vlamp.brightness.value
+		target_vlamp.color_temp.value = self.active_vlamp.color_temp.value
 
 		self.set_active_vlamp(target_vlamp)
 
