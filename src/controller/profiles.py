@@ -25,9 +25,11 @@ def run_at(hour: int, minute: int):
 		return wrapper
 	return actual_decorator
 
-def late(vlamp=vlc.nom):
-	log.info('launching late profile')
-	vlamp.brightness.change(1, 1800, abort_new=True)
+def bedtime(vlamp=vlc.nom, duration=3600):
+
+	log.info('launching bedtime profile')
+	vlc.change_to_nom()
+	vlamp.brightness.change(0, duration, abort_new=True)
 
 
 def get_sunset():
@@ -71,7 +73,6 @@ async def wake_up(vlamp=vlc.nom, duration=1200):
 	vlamp.color_temp.change(0)
 	time.sleep(1)
 
-
 	vlamp.brightness.change(100, duration/2)
 	time.sleep(duration/2)
 	vlamp.color_temp.change(100, duration/2)
@@ -80,5 +81,5 @@ async def wake_up(vlamp=vlc.nom, duration=1200):
 profiles = {
 	'wakeup': wake_up,
 	'sunset': sunset,
-	'late': late
+	'bedtime': bedtime
 }

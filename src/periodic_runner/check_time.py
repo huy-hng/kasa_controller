@@ -22,5 +22,5 @@ def check_time():
 	if compare_time(sunset_start.hour, sunset_start.minute):
 		profiles.sunset()
 		
-	if compare_time(0, 30):
-		profiles.late()
+	# if compare_time(0, 30):
+	# 	profiles.bedtime()
