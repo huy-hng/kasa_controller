@@ -1,4 +1,5 @@
 import os
+import json
 from functools import wraps
 
 from flask import Flask, request, render_template, jsonify
@@ -50,7 +51,17 @@ def active_state():
 @vlamp_required
 def set_active_vlamp(vlamp: VLamp.VLamp):
 	if vlamp.id == 'nom':
-		vlc.transition_to_vlamp(vlamp, int(request.args.get('duration')))
+
+		duration = request.args.get('duration')
+		if duration is None:
+			duration = 0
+		else:
+			try:
+				duration = int(duration)
+			except ValueError:
+				return jsonify(success=False, message='Duration needs to be an integer.'), 400
+
+		vlc.transition_to_vlamp(vlamp, duration)
 		return jsonify(success=True), 200
 
 	vlc.copy_vlamp(vlamp)
