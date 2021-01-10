@@ -69,6 +69,7 @@ class VLampController:
 	def copy_vlamp(self, target_vlamp: VLamp):
 		target_vlamp.brightness.value = self.active_vlamp.brightness.value
 		target_vlamp.color_temp.value = self.active_vlamp.color_temp.value
+		target_vlamp.on = self.active_vlamp.on
 
 		self.set_active_vlamp(target_vlamp)
 
