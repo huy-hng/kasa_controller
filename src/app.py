@@ -71,12 +71,20 @@ def set_active_vlamp(vlamp: VLamp.VLamp):
 @app.route('/<vlamp>/on')
 @vlamp_required
 def on(vlamp):
+	current_vlamp_id = vlc.active_vlamp.id
+	if current_vlamp_id != 'pom' and current_vlamp_id != vlamp.id:
+		vlc.set_active_vlamp(vlamp)
+
 	vlamp.on = True
 	return f'Turning {vlamp.name} on'
 
 @app.route('/<vlamp>/off')
 @vlamp_required
 def off(vlamp):
+	current_vlamp_id = vlc.active_vlamp.id
+	if current_vlamp_id != 'pom' and current_vlamp_id != vlamp.id:
+		vlc.set_active_vlamp(vlamp)
+		
 	vlamp.on = False
 	return f'Turning {vlamp.name} off'
 
