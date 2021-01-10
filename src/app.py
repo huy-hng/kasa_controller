@@ -9,6 +9,22 @@ from .controller import vlc, profiles
 from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
+
+
+def vlamp_required(function):
+	@wraps(function)
+	def wrapper(vlamp, *args, **kwargs):
+
+		try:
+			vlamp = vlc.find_vlamp(vlamp)
+		except:
+			return jsonify(success=False, 
+										message=f'VLamp {vlamp} does not exist.'), 400
+		else:
+			return function(vlamp, *args, **kwargs)
+			
+	return wrapper
+
 app = Flask(__name__)
 
 @app.route('/')
@@ -31,11 +47,8 @@ def active_state():
 
 
 @app.route('/set_active_vlamp/<vlamp>')
+@vlamp_required
 def set_active_vlamp(vlamp=None):
-	result = find_vlamp(vlamp)
-	if isinstance(result, tuple):
-		return result
-	vlamp = result
 
 	vlc.transition_to_vlamp(vlamp)
 
@@ -43,33 +56,22 @@ def set_active_vlamp(vlamp=None):
 
 
 @app.route('/<vlamp>/on')
+@vlamp_required
 def on(vlamp):
-	vlamp = find_vlamp(vlamp)
-	if isinstance(vlamp, tuple):
-		return vlamp
-
 	vlamp.on = True
 	return f'Turning {vlamp.name} on'
 
 @app.route('/<vlamp>/off')
+@vlamp_required
 def off(vlamp):
-	vlamp = find_vlamp(vlamp)
-	if isinstance(vlamp, tuple):
-		return vlamp
-
 	vlamp.on = False
 	return f'Turning {vlamp.name} off'
 
 
 @app.route('/<vlamp>/brightness', methods=['GET', 'DELETE'])
 @app.route('/<vlamp>/color_temp', methods=['GET', 'DELETE'])
+@vlamp_required
 def choose_action(vlamp=0):
-	result = find_vlamp(vlamp)
-	if isinstance(result, tuple):
-		return result
-
-	vlamp = result
-
 	if vlamp.id == 'nom':
 		return
 
@@ -121,11 +123,8 @@ def set_value(vlamp_value, req):
 
 
 @app.route('/<vlamp>/profile/<profile>')
+@vlamp_required
 def launch_profile(vlamp, profile):
-	vlamp = find_vlamp(vlamp)
-	if isinstance(vlamp, tuple):
-		return vlamp
-
 	fn = profiles.profiles.get(profile)
 	if fn is not None:
 		fn() if vlamp is None else fn(vlc.tom)
