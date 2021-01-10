@@ -5,6 +5,5 @@ import requests
 endpoint = 'http://localhost:5000'
 
 
-requests.get(endpoint+'/tom/brightness?target=1')
-time.sleep(1)
-requests.get(endpoint+'/nom/set_active?duration=2')
+requests.get(endpoint+'/nom/profile/wakeup')
+# requests.get(endpoint+'/nom/color_temp?target=0')

@@ -84,7 +84,7 @@ def off(vlamp):
 	current_vlamp_id = vlc.active_vlamp.id
 	if current_vlamp_id != 'pom' and current_vlamp_id != vlamp.id:
 		vlc.set_active_vlamp(vlamp)
-		
+
 	vlamp.on = False
 	return f'Turning {vlamp.name} off'
 
@@ -93,8 +93,8 @@ def off(vlamp):
 @app.route('/<vlamp>/color_temp', methods=['GET', 'DELETE'])
 @vlamp_required
 def choose_action(vlamp):
-	if vlamp.id == 'nom':
-		return
+	# if vlamp.id == 'nom':
+	# 	return
 
 	current_vlamp_id = vlc.active_vlamp.id
 	if current_vlamp_id != 'pom' and current_vlamp_id != vlamp.id:
@@ -147,7 +147,7 @@ def set_value(vlamp_value, req):
 def launch_profile(vlamp, profile):
 	fn = profiles.profiles.get(profile)
 	if fn is not None:
-		fn() if vlamp is None else fn(vlc.tom)
+		fn(vlamp)
 		return f'Executed {profile}'
 	return f'Profile "{profile}" not found.'
 
