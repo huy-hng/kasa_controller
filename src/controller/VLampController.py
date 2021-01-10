@@ -60,7 +60,7 @@ class VLampController:
 		while temporary_vlamp.is_running:
 			time.sleep(0.1)
 			
-		log.debug(f'Transition done.')
+		log.debug('Transition done.')
 
 		self.all_vlamps.remove(temporary_vlamp)
 

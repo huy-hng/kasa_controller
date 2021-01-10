@@ -7,24 +7,12 @@ from flask import Flask, request, render_template, jsonify
 # from .periodic_runner.change_detection import check_changes
 
 from .controller import vlc, profiles, VLamp
+from src.app_helpers import vlamp_required
 from src.logger import log
 # pylint: disable=logging-fstring-interpolation
 
 
 
-def vlamp_required(function):
-	@wraps(function)
-	def wrapper(vlamp, *args, **kwargs):
-
-		try:
-			vlamp = vlc.find_vlamp(vlamp)
-		except:
-			return jsonify(success=False, 
-										message=f'VLamp {vlamp} does not exist.'), 400
-		else:
-			return function(vlamp, *args, **kwargs)
-			
-	return wrapper
 
 app = Flask(__name__)
 
@@ -146,8 +134,13 @@ def set_value(vlamp_value, req):
 @vlamp_required
 def launch_profile(vlamp, profile):
 	fn = profiles.profiles.get(profile)
+	
 	if fn is not None:
-		fn(vlamp)
+		# TODO: proper type checking
+		kwargs = { k: int(v) if v.isdigit() else v for k,v in request.args.items()}
+		log.debug(f'{kwargs}')
+
+		fn(vlamp, **kwargs)
 		return f'Executed {profile}'
 	return f'Profile "{profile}" not found.'
 
