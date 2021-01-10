@@ -30,12 +30,13 @@ class VLamp:
 	@lamp_access.setter
 	def lamp_access(self, val: bool):
 		self._lamp_access = val
-		if val:
+		if val and self.on:
 			self.set_brightness()
 			self.set_color_temp()
 
 
 	def sync(self):
+		asyncio.run(bulb.update())
 		self.brightness.internal_value = bulb.brightness
 		self.color_temp.internal_value = bulb.color_temp
 
