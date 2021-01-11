@@ -36,7 +36,7 @@ class VLamp:
 
 
 	def sync(self):
-		asyncio.run(bulb.update())
+		# asyncio.run(bulb.update()) #cant run inside eventloop
 		self.brightness.internal_value = bulb.brightness
 		self.color_temp.internal_value = bulb.color_temp
 
