@@ -75,9 +75,8 @@ class VLampController:
 
 
 	def change_to_nom(self):
-		if self.active_vlamp == 'tom':
-			vlamp = self.find_vlamp('nom')
-			self.transition_to_vlamp(vlamp, 1)
+		if self.active_vlamp.id == 'tom':
+			self.transition_to_vlamp(self.nom, 1)
 
 
 	def state(self):
