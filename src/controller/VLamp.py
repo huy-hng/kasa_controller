@@ -84,6 +84,7 @@ class VLamp:
 				log.info('Brightness was set to 0, turning lamp off.')
 				await asyncio.sleep(0.5)
 				await bulb.turn_off()
+				self.on = False
 		else:
 			log.debug(f'{self.name} has no lamp access.')
 

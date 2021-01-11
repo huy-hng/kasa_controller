@@ -28,6 +28,9 @@ def run_at(hour: int, minute: int):
 def bedtime(vlamp=vlc.nom, duration=3600):
 
 	log.info('launching bedtime profile')
+	if vlc.active_vlamp.id != 'nom':
+		vlc.nom.brightness.value = vlc.active_vlamp.brightness.value
+
 	vlc.change_to_nom()
 	vlamp.brightness.change(0, duration, abort_new=True)
 
