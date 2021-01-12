@@ -138,7 +138,6 @@ def launch_profile(vlamp, profile):
 	if fn is not None:
 		# TODO: proper type checking
 		kwargs = { k: int(v) if v.isdigit() else v for k,v in request.args.items()}
-		log.debug(f'{kwargs}')
 
 		fn(vlamp, **kwargs)
 		return f'Executed {profile}'
