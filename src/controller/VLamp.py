@@ -36,7 +36,7 @@ class VLamp:
 
 
 	def sync(self):
-		# asyncio.run(bulb.update()) #cant run inside eventloop
+		asyncio.run(bulb.update())
 		self.brightness.internal_value = bulb.brightness
 		self.color_temp.internal_value = bulb.color_temp
 
@@ -47,60 +47,74 @@ class VLamp:
 
 	@on.setter
 	def on(self, state: bool):
-		self._on = state
-		# TODO: check if I can just use self.set_brightness and self.set_color_temp()
 		if self.lamp_access:
 			if state:
-				asyncio.run(bulb.turn_on())
-				asyncio.run(bulb.set_brightness(self.brightness.internal_value))
-				asyncio.run(bulb.set_color_temp(self.color_temp.internal_value))
-				asyncio.run(bulb.update())
+				self.turn_on()
+
 			else:
-				asyncio.run(bulb.turn_off())
-				asyncio.run(bulb.update())
-				
-		# self.set_brightness()
-		# self.set_color_temp()
+				self.turn_off()
+
+	def turn_on(self, duration=0):
+		if not self._on:
+			asyncio.run(bulb.turn_on())
+			# time.sleep(1)
+			self.brightness.change(self.brightness.before_off_value, duration, 1)
+			self.color_temp.change(self.color_temp.before_off_value, duration, 0)
+			asyncio.run(bulb.update())
+		self._on = True
+
+	def turn_off(self, duration=0):
+		if self._on:
+			self.brightness.before_off_value = self.brightness.value
+			self.color_temp.before_off_value = self.color_temp.value
+			self.brightness.change(1, duration)
+			self.color_temp.change(0, duration)
+			time.sleep(0.5)
+			while self.is_running:
+				time.sleep(0.1)
+			time.sleep(0.5)
+			asyncio.run(bulb.turn_off())
+			asyncio.run(bulb.update())
+		self._on = False
 
 
-	@helpers.run
-	async def set_brightness(self):
+	def set_brightness(self):
 		turn_off = False
 		if self.brightness.value == 0:
 			self.brightness.value = 1
 			turn_off = True
+		elif not self.on:
+			self._on = True
+			time.sleep(3)
 
 		if self.lamp_access:
-			# if not bulb.is_on:
-			# 	log.debug('Lamp is off, turning on.')
-			# 	await bulb.turn_on()
-			# 	await bulb.update()
-
 			log.info(f'{self.name} changing brightness to {self.brightness.value}.')
 
-			await self.retry_on_fail(bulb.set_brightness, self.brightness)
+			self.retry_on_fail(bulb.set_brightness, self.brightness.internal_value)
 
 			if turn_off:
 				log.info('Brightness was set to 0, turning lamp off.')
-				await asyncio.sleep(0.5)
-				await bulb.turn_off()
+				time.sleep(1)
+				asyncio.run(bulb.turn_off())
 				self.on = False
 		else:
 			log.debug(f'{self.name} has no lamp access.')
 
 
-	@helpers.run
-	async def set_color_temp(self):
-		if self.lamp_access:
+
+	def set_color_temp(self):
+		if self.lamp_access and self.on:
 			log.info(f'{self.name} changing color temperature to {self.color_temp.internal_value}.')
-			await self.retry_on_fail(bulb.set_color_temp, self.color_temp)
+			self.retry_on_fail(bulb.set_color_temp, self.color_temp.internal_value)
 		else:
 			log.debug(f'{self.name} has no lamp access.')
-		
-	async def retry_on_fail(self, fn, val):
+
+
+
+	def retry_on_fail(self, fn, val: int):
 		for _ in range(12):
 			try:
-				await fn(val.internal_value)
+				asyncio.run(fn(val))
 				break
 			except kasa.exceptions.SmartDeviceException as e:
 				if 'Communication error' not in str(e):
@@ -114,11 +128,13 @@ class VLamp:
 				break
 
 
+
 	@property
 	def is_running(self):
 		if self.brightness.running or self.color_temp.running:
 			return True
 		return False
+
 
 
 	@property
@@ -127,7 +143,7 @@ class VLamp:
 			'id': self.id,
 			'name': self.name,
 			'lamp_access': self.lamp_access,
-			'on': self.on,
+			'on': self._on,
 			'brightness': self.brightness.value,
 			'color_temp': self.color_temp.value,
 			'is_running': self.is_running

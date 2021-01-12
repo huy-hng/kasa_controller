@@ -19,6 +19,7 @@ class Parent:
 
 	set_val_fn: typing.Callable
 
+	before_off_value: int = 1
 	running = False
 	should_stop = False
 	
@@ -87,7 +88,7 @@ class Parent:
 		if start_value is not None:
 			self.value = start_value
 			self.set_val_fn()
-			time.sleep(1)
+			time.sleep(0.5)
 
 		self.running = True
 		self.transition(target_value, duration)

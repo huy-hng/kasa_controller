@@ -21,7 +21,7 @@ def thread(fn):
 		executor.submit(check_for_error, future, fn.__name__)
 	return wrapper
 
-def run(fn):
+def async_run(fn):
 	@wraps(fn)
 	def wrapper(*args, **kwargs):
 		asyncio.run(fn(*args, **kwargs))

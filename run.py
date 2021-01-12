@@ -17,4 +17,4 @@ if not debug:
 	time.tzset()
 
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
-app.run(host='0.0.0.0', debug=False)
+app.run(host='0.0.0.0', debug=debug)

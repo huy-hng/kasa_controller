@@ -1,5 +1,6 @@
 import time
 import datetime
+import asyncio
 from functools import wraps
 
 import astral
@@ -63,12 +64,11 @@ def sunset(vlamp=vlc.nom):
 		
 
 @helpers.thread
-@helpers.run
 async def wake_up(vlamp=vlc.nom, duration=1200):
 	log.warning('Running Wake Up profile.')
 	if vlc.active_vlamp.id != 'pom':
-		await bulb.turn_on()
-		await bulb.update()
+		asyncio.run(bulb.turn_on())
+		asyncio.run(bulb.update())
 
 	vlc.change_to_nom()
 	
