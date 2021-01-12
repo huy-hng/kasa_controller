@@ -32,7 +32,8 @@ def bedtime(vlamp=vlc.nom, duration=3600):
 	if vlc.active_vlamp.id != 'nom':
 		vlc.nom.brightness.value = vlc.active_vlamp.brightness.value
 
-	vlc.change_to_nom()
+	if vlc.active_vlamp.id == 'tom':
+		vlc.change_to_nom()
 	vlamp.brightness.change(0, duration, abort_new=True)
 
 
@@ -59,18 +60,18 @@ def sunset(vlamp=vlc.nom):
 
 	log.info('running sunset profile')
 	
-	vlc.change_to_nom()	
+	if vlc.active_vlamp.id == 'tom':
+		vlc.change_to_nom()
+		
 	vlamp.color_temp.change(0, duration.seconds, abort_new=True)
 		
 
 @helpers.thread
 async def wake_up(vlamp=vlc.nom, duration=1200):
 	log.warning('Running Wake Up profile.')
-	if vlc.active_vlamp.id != 'pom':
-		asyncio.run(bulb.turn_on())
-		asyncio.run(bulb.update())
 
-	vlc.change_to_nom()
+	if vlc.active_vlamp.id == 'tom':
+		vlc.change_to_nom()
 	
 	vlamp.brightness.change(1)
 	vlamp.color_temp.change(0)
