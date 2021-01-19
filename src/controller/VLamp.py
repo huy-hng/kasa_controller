@@ -47,6 +47,7 @@ class VLamp:
 
 	@on.setter
 	def on(self, state: bool):
+		# TODO: only tweak speed since logic is reliable
 		if self.lamp_access:
 			if state:
 				self.turn_on()
