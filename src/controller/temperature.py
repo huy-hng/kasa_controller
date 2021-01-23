@@ -14,17 +14,16 @@ from src.controller.parent_value_class import Parent
 class ColorTemperature(Parent):
 	def __init__(self, set_val_fn):
 		self.internal_valid_range = (2700, 6500)
+		self.internal_factor = (self.internal_valid_range[1] - self.internal_valid_range[0]) / 100
 		self.external_valid_range = (0, 100)
 		self.set_val_fn = set_val_fn
 
 
-	@staticmethod
-	def convert_to_external(internal) -> int:
-		return int((internal - 2700) / 38)
+	def convert_to_external(self, internal) -> int:
+		return int((internal - 2700) / self.internal_factor)
 
-	@staticmethod
-	def convert_to_internal(external) -> int:
-		return int(38 * external + 2700)
+	def convert_to_internal(self, external) -> int:
+		return int(self.internal_factor * external + 2700)
 
 
 
