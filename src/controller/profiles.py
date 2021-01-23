@@ -5,7 +5,7 @@ from functools import wraps
 import astral
 from astral import sun
 
-from src.controller import vlc, bulb
+from src.controller import vlc
 from . import helpers
 from src.logger import log
 

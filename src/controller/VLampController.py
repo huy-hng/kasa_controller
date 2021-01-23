@@ -46,7 +46,6 @@ class VLampController:
 
 	def transition_to_vlamp(self, target_vlamp: VLamp, transition_duration=0):
 		log.info(f'Transitioning to VLamp {target_vlamp.name} with duration of {transition_duration}')
-		log.debug(f'{transition_duration}, {type(transition_duration)}')
 
 		temporary_vlamp = VLamp('temp', 'Temporary Vlamp')
 		self.all_vlamps.append(temporary_vlamp)
