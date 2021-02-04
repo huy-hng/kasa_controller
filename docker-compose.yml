@@ -11,14 +11,14 @@ services:
       # TODO: when the folder structure or folder names get changed
     restart: unless-stopped
 
-  socat:
-    container_name: socat
-    image: alpine/socat
-    ports: 
-      - 5443:5443
-    links:
-      - 'kasa_controller'
-    command: openssl-listen:5443,fork,reuseaddr,cert=/tls/server.pem,verify=0 tcp-connect:kasa_controller:5000
-    volumes:
-      - ./server.pem:/tls/server.pem
-    restart: unless-stopped
+  # socat:
+  #   container_name: socat
+  #   image: alpine/socat
+  #   ports: 
+  #     - 5443:5443
+  #   links:
+  #     - 'kasa_controller'
+  #   command: openssl-listen:5443,fork,reuseaddr,cert=/tls/server.pem,verify=0 tcp-connect:kasa_controller:5000
+  #   volumes:
+  #     - ./server.pem:/tls/server.pem
+  #   restart: unless-stopped
