@@ -13,7 +13,7 @@ from src.controller.parent_value_class import Parent
 @dataclass
 class ColorTemperature(Parent):
 	def __init__(self, set_val_fn):
-		self.internal_valid_range = (2700, 6500)
+		self.internal_valid_range = (2700, 6000)
 		self.internal_factor = (self.internal_valid_range[1] - self.internal_valid_range[0]) / 100
 		self.external_valid_range = (0, 100)
 		self.set_val_fn = set_val_fn
