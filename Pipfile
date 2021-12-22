@@ -10,6 +10,7 @@ python-kasa = "*"
 astral = "*"
 pylint = "*"
 python-dotenv = "*"
+gunicorn = "*"
 
 [dev-packages]
 rope = "*"

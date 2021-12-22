@@ -65,7 +65,7 @@ def sunset(vlamp=vlc.nom):
 		
 
 @helpers.thread
-def wake_up(vlamp=vlc.nom, duration=1200):
+def wake_up(vlamp=vlc.nom, duration=3600):
 	log.warning('Running Wake Up profile.')
 
 	if vlc.active_vlamp.id == 'tom':
