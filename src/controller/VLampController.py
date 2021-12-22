@@ -73,7 +73,7 @@ class VLampController:
 		self.set_active_vlamp(target_vlamp)
 
 
-	def change_to_nom(self):
+	def tom_to_nom(self):
 		if self.active_vlamp.id == 'tom':
 			self.transition_to_vlamp(self.nom, 1)
 

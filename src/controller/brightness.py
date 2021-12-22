@@ -25,7 +25,7 @@ class Brightness(Parent):
 	def convert_to_internal(external: int) -> int:
 		return round(( (external + 33)**3 ) / 23526)
 
-	def transition(self, target_value: int, duration: int):
+	def _transition(self, target_value: int, duration: int):
 		log.info(f'Transitioning to {target_value} with duration of {duration}')
 
 		diff = target_value - self.value

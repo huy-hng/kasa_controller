@@ -27,7 +27,7 @@ class ColorTemperature(Parent):
 
 
 
-	def transition(self, target_value: int, duration:int):
+	def _transition(self, target_value: int, duration:int):
 		target_kelvin = self.convert_to_internal(target_value)
 
 		diff = target_kelvin - self.internal_value

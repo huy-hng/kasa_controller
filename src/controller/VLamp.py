@@ -39,6 +39,7 @@ class VLamp:
 		asyncio.run(bulb.update())
 		self.brightness.internal_value = bulb.brightness
 		self.color_temp.internal_value = bulb.color_temp
+		self._on = bulb.is_on
 
 
 	@property

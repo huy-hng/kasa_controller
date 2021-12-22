@@ -17,7 +17,7 @@ class Parent:
 	internal_valid_range: tuple
 	external_valid_range: tuple
 
-	set_val_fn: typing.Callable
+	set_val_fn: typing.Callable # the fn to change the val like "set_brightness()"
 
 	before_off_value: int = 1
 	running = False
@@ -27,6 +27,11 @@ class Parent:
 	@staticmethod
 	def convert_to_internal(external):
 		raise NotImplementedError
+
+	@staticmethod
+	def convert_to_external(internal):
+		raise NotImplementedError
+
 
 	@property
 	def internal_value(self):
@@ -40,11 +45,6 @@ class Parent:
 		self._internal_value = val
 
 
-
-	@staticmethod
-	def convert_to_external(internal):
-		raise NotImplementedError
-
 	@property
 	def value(self):
 		return self._value
@@ -57,10 +57,6 @@ class Parent:
 		self._internal_value = self.convert_to_internal(val)
 
 
-
-
-
-
 	@staticmethod
 	def check_valid_range(val, boundries: tuple):
 		if val < boundries[0]: val = boundries[0]
@@ -69,7 +65,8 @@ class Parent:
 
 
 	@helpers.thread
-	def change(self, target_value: int, duration: int=0, start_value: int=None, abort_new=False):
+	def change(self, target_value: int, duration: int=0,
+									 start_value: int=None, abort_new: bool=False):
 		log.info(f'Changing Value to {target_value}, with duration of {duration}')
 		if abort_new and self.running:
 			return
@@ -91,15 +88,16 @@ class Parent:
 			time.sleep(0.5)
 
 		self.running = True
-		self.transition(target_value, duration)
+		self._transition(target_value, duration)
 		self.running = False
 
 
-	def transition(self, target_value: int, duration: int):
+	def _transition(self, target_value: int, duration: int):
 		raise NotImplementedError
 
 
 	def wait_for_stop(self):
+		""" If self.change is already running, wait for it to stop """
 		if self.running:
 			self.should_stop = True
 
