@@ -2,10 +2,12 @@ import logging
 import datetime
 import os
 
-if not os.path.isdir('./logs'):
-	os.mkdir('./logs')
+folder_path = './logs'
 
-log = logging.getLogger('LOG')
+if not os.path.isdir(folder_path):
+	os.mkdir(folder_path)
+
+log = logging.getLogger('My Logger')
 log.setLevel(logging.DEBUG)
 
 formatter = logging.Formatter(
@@ -13,12 +15,14 @@ formatter = logging.Formatter(
 	datefmt='%Y-%m-%d %H:%M:%S'
 )
 
+console_formatter = logging.Formatter('%(message)3s')
+
 def file_handler(folder, log_level):
-	if not os.path.isdir(f'./logs/{folder}'):
-		os.mkdir(f'./logs/{folder}')
+	if not os.path.isdir(f'{folder_path}/{folder}'):
+		os.mkdir(f'{folder_path}/{folder}')
 
 	handler = logging.FileHandler(
-							f'logs/{folder}/' 
+							f'{folder_path}/{folder}/' 
 							+ datetime.datetime.now().strftime("%Y-%m-%d") 
 							+ '.log')
 	handler.setLevel(log_level)
@@ -27,8 +31,9 @@ def file_handler(folder, log_level):
 
 file_handler('debug', logging.DEBUG)
 file_handler('info', logging.INFO)
+file_handler('error', logging.ERROR)
 
 consoleHandler = logging.StreamHandler()
-consoleHandler.setFormatter(formatter)
-consoleHandler.setLevel(logging.DEBUG)
+consoleHandler.setFormatter(console_formatter)
+consoleHandler.setLevel(logging.INFO)
 log.addHandler(consoleHandler)
