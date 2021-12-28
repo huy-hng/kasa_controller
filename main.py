@@ -2,8 +2,6 @@ import asyncio
 from src.controller import lamp
 
 
-
-
 bulb = lamp.Bulb('10.0.2.23')
 async def main():
 	await bulb.update()
