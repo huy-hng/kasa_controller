@@ -5,8 +5,8 @@ from dataclasses import dataclass
 import kasa
 
 from src.controller import helpers, bulb
-from src.controller.brightness import Brightness
-from src.controller.temperature import ColorTemperature
+from old_code.brightness import Brightness
+from old_code.temperature import ColorTemperature
 from src.logger import log
 
 # pylint: disable=logging-fstring-interpolation

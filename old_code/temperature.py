@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from src.controller import helpers, SINGLE_CHANGE_DUR
 from src.logger import log
 
-from src.controller.parent_value_class import Parent
+from old_code.parent_value_class import Parent
 
 
 # pylint: disable=logging-fstring-interpolation
