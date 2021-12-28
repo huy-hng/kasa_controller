@@ -2,14 +2,15 @@ import asyncio
 from src.controller import lamp
 
 
-bulb = lamp.Bulb('10.0.2.23')
+bulb = lamp.BulbController('10.0.2.23')
 async def main():
 	await bulb.update()
 	# await bulb.set_color_temp(0)
 	# await bulb.set_brightness(100)
-	await bulb.transition_brightness(100 , 3)
-	await bulb.update()
-	print(bulb.brightness)
+	# await bulb.transition_brightness(100 , 3)
+	await bulb.transition_color_temp(100 , 3)
+	# await bulb.update()
+	# print(bulb.brightness)
 	# asyncio.run(bulb.turn_on())
 
 async def test():

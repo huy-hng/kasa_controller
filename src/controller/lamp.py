@@ -8,7 +8,7 @@ from src.logger import log
 from src.helpers import run_parallel, run_sequential
 
 @dataclass
-class Bulb(SmartBulb):
+class BulbController(SmartBulb):
 	prev_state = {
 		'brightness': 0,
 		'color_temp': 0
@@ -30,7 +30,6 @@ class Bulb(SmartBulb):
 			self.set_color_temp(self.prev_state['color_temp'], duration)
 		)
 
-
 	async def turn_off(self, duration=None):
 		await self.update()
 		self.prev_state['brightness'] = self.lin_to_log(self.brightness)
@@ -46,19 +45,16 @@ class Bulb(SmartBulb):
 		)
 		
 
-
 	#region brightness
 	async def set_brightness(self, val: int, transition: int=1000):
 		adjusted = self.log_to_lin(val)
 		log.debug(f'Setting brightness to {adjusted}')
 		await super().set_brightness(adjusted, transition=transition)
 
-
 	async def set_raw_brightness(self, val: int, transition: int=1000):
 		""" Set brightness without any adjustments. That means both
 				linear and logarithmic values can be used. """
 		await super().set_brightness(val, transition=transition)
-
 
 	async def transition_brightness(self, target_value: int, duration: int):
 		log.info(f'Transitioning to {target_value} with duration of {duration}')
@@ -89,9 +85,11 @@ class Bulb(SmartBulb):
 		log.debug('Done transitioning.')
 
 
+	#region brightness helpers
 	@staticmethod
 	def lin_to_log(internal: int) -> int:
 		return round(( (23526*internal) ** (1/3) ) - 33)
+
 
 	@staticmethod
 	def log_to_lin(external: int) -> int:
@@ -121,6 +119,7 @@ class Bulb(SmartBulb):
 
 		return sleep_dur / amount_of_steps
 
+
 	def get_step_size(self, duration, diff):
 		step_size = (diff * self.SINGLE_CHANGE_DUR) / (duration)
 		
@@ -132,6 +131,7 @@ class Bulb(SmartBulb):
 			step_size = math.ceil(step_size)
 
 		return step_size
+	#endregion brightness helpers
 	#endregion brightness
 
 
@@ -147,12 +147,18 @@ class Bulb(SmartBulb):
 		adjusted = self.percentage_to_kelvin(temp)
 		await super().set_color_temp(adjusted, transition=transition)
 
+	async def transition_color_temp(self, target_value: int, duration):
+		self.set_color_temp(target_value, duration * 1000)
 
+
+	#region color_temp helpers
 	def kelvin_to_percentage(self, kelvin: int):
 		""" convert kelvin (2700 - 6500) to percentage (0 - 100) """
 		return int((kelvin - 2700) / self.color_temp_factor)
 
+
 	def percentage_to_kelvin(self, percentage: int):
 		""" convert percentage (0 - 100) to kelvin (2700 - 6500) """
 		return int(self.color_temp_factor * percentage + 2700)
+	#endregion color_temp helpers
 	#endregion color_temp
