@@ -9,7 +9,9 @@ from src.controller import vlc
 from . import helpers
 from src.logger import log
 
-location = astral.LocationInfo(timezone='Europe/Berlin', latitude=49.878708, longitude=8.646927)
+location = astral.LocationInfo(timezone='Europe/Berlin',
+															 latitude=49.878708,
+															 longitude=8.646927)
 
 def run_at(hour: int, minute: int):
 	target = datetime.time(hour, minute)
