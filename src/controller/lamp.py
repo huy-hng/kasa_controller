@@ -22,15 +22,19 @@ class BulbController(SmartBulb):
 		super().__init__(ip)
 		
 
-	async def turn_on(self, duration=None):
+	async def turn_on(self, duration:int=None, prev_state:bool=False):
+		""" duration: how long it takes until previous brightness value is reached
+				prev_state: set the state to the state before turn off """
 		await super().turn_on()
 		await asyncio.sleep(2)
-		await run_parallel(
-			self.set_brightness(self.prev_state['brightness'], duration),
-			self.set_color_temp(self.prev_state['color_temp'], duration)
-		)
+		if prev_state: # TODO this might be buggy
+			await run_parallel(
+				self.set_brightness(self.prev_state['brightness'], duration),
+				self.set_color_temp(self.prev_state['color_temp'], duration)
+			)
 
 	async def turn_off(self, duration=None):
+		""" duration: how long it takes until turn off """
 		await self.update()
 		self.prev_state['brightness'] = self.lin_to_log(self.brightness)
 		self.prev_state['color_temp'] = self.kelvin_to_percentage(self.color_temp)
@@ -47,6 +51,7 @@ class BulbController(SmartBulb):
 
 	#region brightness
 	async def set_brightness(self, val: int, transition: int=1000):
+		""" val: value in percentage of subjective preceived brightness """
 		adjusted = self.log_to_lin(val)
 		log.debug(f'Setting brightness to {adjusted}')
 		await super().set_brightness(adjusted, transition=transition)
@@ -148,7 +153,8 @@ class BulbController(SmartBulb):
 		await super().set_color_temp(adjusted, transition=transition)
 
 	async def transition_color_temp(self, target_value: int, duration):
-		self.set_color_temp(target_value, duration * 1000)
+		""" duration in seconds """
+		await self.set_color_temp(target_value, duration * 1000)
 
 
 	#region color_temp helpers
