@@ -27,12 +27,13 @@ class ProgramController:
 		#	transition to layer below
 
 	def check_for_program_start(self):
-		current_time = None # TODO
 		now = time.localtime()
 		current_time = datetime.time(now.tm_hour, now.tm_min)
 		for name, program in self.programs.items():
 			try:
 				if program.start_time == current_time:
 					self.activate_program(program)
-			except AttributeError:
-				pass
+				if program.end_time == current_time:
+					self.deactivate_program(program)
+			except AttributeError as e:
+				raise NotImplementedError(e)
